@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs_app
+    env_file:
+      - .production.env
+    ports:
+      - '5005:5005'
+    depends_on:
+      - postgres
+      - minio
+      - redis
+    restart: unless-stopped
+    command: >
+      sh -c "
+      npm run prisma:migrate:prod &&
+      npm run prisma:migrate:deploy:prod &&
+      npm run prisma:generate:prod &&
+      npm start
+      "
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
+    env_file:
+      - .production.env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    command: ['postgres', '-c', 'jit=off']
+    ports:
+      - '5432:5432'
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    env_file:
+      - .production.env
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data
+    ports:
+      - '9000:9000'
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - '6379:6379'
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  minio_data:

@@ -1,0 +1,39 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "re",
+      "database": "postgres",
+      "username": "postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "myMental",
+      "database": "my_mental",
+      "username": "postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "93.127.186.86",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "bee verse",
+      "database": "bee_verse",
+      "username": "postgres"
+    }
+  ],
+  "CodeGPT.apiKey": "CodeGPT Plus Beta",
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "liveServer.settings.multiRootWorkspaceName": "myMental"
+}
