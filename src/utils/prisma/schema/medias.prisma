@@ -1,0 +1,16 @@
+model Media {
+    id           String                @id() @default(uuid()) @db.Uuid
+    fileName     String                @map("file_name")
+    filePath     String                @map("file_path")
+    size         String
+    mimeType     String                @map("mime_type")
+    originalName String                @map("original_name")
+    clientId     String?               @unique @map("client_id") @db.Uuid
+    specialistId String?               @map("specialist_id") @db.Uuid
+    educationId  String?               @unique @map("education_id") @db.Uuid
+    fileType     MediaType              @map("file_type")
+    createdAt    DateTime?             @default(now()) @map("created_at")
+    updatedAt    DateTime?             @updatedAt @map("updated_at")
+
+    @@map("medias")
+}

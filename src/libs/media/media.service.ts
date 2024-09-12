@@ -30,7 +30,7 @@ export class MediaService {
       };
       mediaData[entityColumn] = entityId;
 
-      const media = await this.prismaService.medias.create({
+      const media = await this.prismaService.media.create({
         data: mediaData,
       });
 
@@ -56,7 +56,7 @@ export class MediaService {
     };
     mediaData[entityColumn] = entityId;
 
-    const media = await this.prismaService.medias.create({
+    const media = await this.prismaService.media.create({
       data: mediaData,
     });
 
@@ -79,13 +79,12 @@ export class MediaService {
     };
     mediaData[entityColumn] = entityId;
 
-    const media = await this.prismaService.medias.create({
+    const media = await this.prismaService.media.create({
       data: mediaData,
     });
 
     return media.id;
   }
-
 
   async createProductFileMedia(
     file: ITransformedFile,
@@ -103,7 +102,7 @@ export class MediaService {
     };
     mediaData[entityColumn] = entityId;
 
-    const media = await this.prismaService.medias.create({
+    const media = await this.prismaService.media.create({
       data: mediaData,
     });
 
@@ -112,7 +111,7 @@ export class MediaService {
 
   async deleteMedias(fileIds: string[]) {
     this.logger.log(`Удаление медиа с идентификаторами: ${fileIds.join(', ')}`);
-    const files = await this.prismaService.medias.findMany({
+    const files = await this.prismaService.media.findMany({
       where: { id: { in: fileIds } },
     });
     if (!files.length) {
@@ -121,14 +120,14 @@ export class MediaService {
     }
     const fileNames = files.map((file) => file.fileName);
     await this.minioService.deleteFiles(fileNames);
-    await this.prismaService.medias.deleteMany({
+    await this.prismaService.media.deleteMany({
       where: { id: { in: fileIds } },
     });
   }
 
   async deleteOneMedia(mediaId: string) {
     this.logger.log(`Удаление медиа с идентификатором: ${mediaId}`);
-    const file = await this.prismaService.medias.findUnique({
+    const file = await this.prismaService.media.findUnique({
       where: { id: mediaId },
     });
     if (!file) {
@@ -136,14 +135,14 @@ export class MediaService {
       throw new NotFoundException('Media not found!');
     }
     await this.minioService.deleteFile(file.fileName);
-    await this.prismaService.medias.delete({
+    await this.prismaService.media.delete({
       where: { id: mediaId },
     });
   }
 
   async getOneMedia(mediaId: string) {
     this.logger.log(`Получение медиа с идентификатором: ${mediaId}`);
-    const media = await this.prismaService.medias.findUnique({
+    const media = await this.prismaService.media.findUnique({
       where: { id: mediaId },
     });
     if (!media) {

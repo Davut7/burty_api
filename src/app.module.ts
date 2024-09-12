@@ -13,6 +13,9 @@ import { HealthModule } from './utils/health/health.module';
 import { MediaModule } from './libs/media/media.module';
 import { AuthGuard } from './common/guards/auth.guard';
 import { RedisModule } from './libs/redis/redis.module';
+import { AuthModule } from './components/auth/auth.module';
+import { TokenModule } from './components/token/token.module';
+import { UsersModule } from './components/users/users.module';
 
 @Module({
   imports: [
@@ -37,7 +40,10 @@ import { RedisModule } from './libs/redis/redis.module';
     MediaModule,
     MinioModule,
     PrismaModule,
-    RedisModule
+    RedisModule,
+    AuthModule,
+    TokenModule,
+    UsersModule,
   ],
   providers: [
     {

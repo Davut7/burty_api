@@ -31,48 +31,6 @@ export class RedisService {
     return retrievedToken;
   }
 
-  async setEmailVerificationLinkWithExpiry(
-    key: string,
-    link: string,
-  ): Promise<void> {
-    this.logger.log(
-      `Устанавливаем ссылку ${link} с истечением срока для ключа: ${key}`,
-    );
-    await this.redisRepository.setWithExpiry(
-      'verificationLink',
-      key,
-      link,
-      +this.tenMinutesInSeconds,
-    );
-    this.logger.log(
-      `Ссылка ${link} установлена с истечением срока для ключа: ${key}`,
-    );
-  }
-
-  async getEmailVerificationLink(key: string) {
-    this.logger.log(`Получаем ссылку из Redis для ключа: ${key}`);
-    const retrievedLink = await this.redisRepository.get(
-      'verificationLink',
-      key,
-    );
-    if (retrievedLink) {
-      this.logger.log(
-        `Ссылка для ключа: ${key} получена из Redis: ${retrievedLink}`,
-      );
-    } else {
-      this.logger.warn(`Ссылка для ключа: ${key} не найдена в Redis`);
-    }
-    return retrievedLink;
-  }
-
-  async deleteEmailVerificationLink(key: string) {
-    this.logger.log(`Удаляем ссылку из Redis для ключа: ${key}`);
-    await this.redisRepository.delete('verificationLink', key);
-
-    this.logger.warn(`Ссылка для ключа: ${key} удален`);
-    return true;
-  }
-
   async setResetPasswordLinkWithExpiry(
     key: string,
     link: string,
@@ -115,15 +73,15 @@ export class RedisService {
     return true;
   }
 
-  async setPhoneNumberVerificationWithExpiry(
+  async setEmailVerificationWithExpiry(
     key: string,
     code: string,
   ): Promise<void> {
     this.logger.log(
-      `Устанавливаем код для верификация номера ${code} с истечением срока для ключа: ${key}`,
+      `Устанавливаем код для верификация почты ${code} с истечением срока для ключа: ${key}`,
     );
     await this.redisRepository.setWithExpiry(
-      'phoneNumberVerification',
+      'emailVerification',
       key,
       code,
       +this.tenMinutesInSeconds,
@@ -133,10 +91,10 @@ export class RedisService {
     );
   }
 
-  async getPhoneNumberVerificationCode(key: string) {
+  async getEmailVerificationCode(key: string) {
     this.logger.log(`Получаем код из Redis для ключа: ${key}`);
     const retrievedCode = await this.redisRepository.get(
-      'phoneNumberVerification',
+      'emailVerification',
       key,
     );
     if (retrievedCode) {
@@ -149,9 +107,9 @@ export class RedisService {
     return retrievedCode;
   }
 
-  async deletePhoneNumberVerificationCode(code: string) {
+  async deleteEmailVerificationCode(code: string) {
     this.logger.log(`Удаляем код из Redis для ключа: ${code}`);
-    await this.redisRepository.delete('phoneNumberVerification', code);
+    await this.redisRepository.delete('emailVerification', code);
 
     this.logger.warn(`Ссылка для ключа: ${code} удален`);
     return true;
