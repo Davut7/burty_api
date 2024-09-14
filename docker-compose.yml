@@ -1,33 +1,24 @@
-version: '3.8'
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: nestjs_app
-    env_file:
-      - .production.env
     ports:
       - '5005:5005'
     depends_on:
-      - postgres
-      - minio
-      - redis
+      - burty_postgres
+      - burty_minio
+      - burty_redis
     restart: unless-stopped
+    environment:
+      STARTUP_COMMAND: ${STARTUP_COMMAND}
     command: >
-      sh -c "
-      npm run prisma:migrate:prod &&
-      npm run prisma:migrate:deploy:prod &&
-      npm run prisma:generate:prod &&
-      npm start
-      "
+      sh -c "${STARTUP_COMMAND}"
 
-  postgres:
+  burty_postgres:
     image: postgres:latest
-    container_name: postgres_db
-    env_file:
-      - .production.env
+    container_name: burty_postgres_db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -39,11 +30,9 @@ services:
       - '5432:5432'
     restart: unless-stopped
 
-  minio:
+  burty_minio:
     image: minio/minio:latest
-    container_name: minio
-    env_file:
-      - .production.env
+    container_name: burty_minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -54,9 +43,9 @@ services:
       - minio_data:/data
     restart: unless-stopped
 
-  redis:
+  burty_redis:
     image: redis:latest
-    container_name: redis
+    container_name: burty_redis
     ports:
       - '6379:6379'
     restart: unless-stopped

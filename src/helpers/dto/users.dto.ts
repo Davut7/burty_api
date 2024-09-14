@@ -9,7 +9,11 @@ import {
   IsStrongPassword,
 } from 'class-validator';
 
-export class UsersDto extends PickType(UsersType, ['email', 'role']) {
+export class UsersDto extends PickType(UsersType, [
+  'email',
+  'role',
+  'userName',
+]) {
   @IsString()
   @IsEmail()
   @IsNotEmpty()
@@ -24,4 +28,8 @@ export class UsersDto extends PickType(UsersType, ['email', 'role']) {
   @IsEnum($Enums.UserRole)
   @IsNotEmpty()
   role: $Enums.UserRole;
+
+  @IsString()
+  @IsNotEmpty()
+  userName: string;
 }

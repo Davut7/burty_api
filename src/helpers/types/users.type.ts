@@ -25,6 +25,11 @@ export class UsersType implements Users {
   })
   role: $Enums.UserRole;
 
+
+  @ApiProperty({description:'Имя пользователя',example:'Иван'})
+  userName:string
+
+
   @Exclude()
   isDeleted: boolean;
 
@@ -42,4 +47,5 @@ export class UsersType implements Users {
 
   @Exclude()
   isVerified: boolean;
+
 }

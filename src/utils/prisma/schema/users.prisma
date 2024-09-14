@@ -1,8 +1,9 @@
 model Users {
      id String @id @default(uuid()) @db.Uuid
     email String @unique
-    password String
-    role UserRole
+    password String?
+    role UserRole?
+    userName String? @map("user_name")
     isVerified Boolean @map("is_verified") @default(false)
     lastLoginTime DateTime? @map("last_login_time")
     createdAt DateTime @default(now()) @map("created_at")

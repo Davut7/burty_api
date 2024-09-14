@@ -16,6 +16,7 @@ import { RedisModule } from './libs/redis/redis.module';
 import { AuthModule } from './components/auth/auth.module';
 import { TokenModule } from './components/token/token.module';
 import { UsersModule } from './components/users/users.module';
+import { AuthCommonModule } from './components/common/authCommon/authCommon.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { UsersModule } from './components/users/users.module';
     AuthModule,
     TokenModule,
     UsersModule,
+    AuthCommonModule,
   ],
   providers: [
     {

@@ -4,6 +4,7 @@ export class UserTokenDto {
   id: string;
   email: string;
   isVerified: boolean;
+  userName: string;
   role: UserRole;
 
   constructor(entity) {
@@ -11,5 +12,6 @@ export class UserTokenDto {
     this.email = entity.email;
     this.isVerified = entity.isVerified;
     this.role = entity.role;
+    this.userName = entity.userName;
   }
 }
