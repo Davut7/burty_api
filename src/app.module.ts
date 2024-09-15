@@ -17,6 +17,7 @@ import { AuthModule } from './components/auth/auth.module';
 import { TokenModule } from './components/token/token.module';
 import { UsersModule } from './components/users/users.module';
 import { AuthCommonModule } from './components/common/authCommon/authCommon.module';
+import { CategoryModule } from './components/category/category.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AuthCommonModule } from './components/common/authCommon/authCommon.modu
     TokenModule,
     UsersModule,
     AuthCommonModule,
+    CategoryModule,
   ],
   providers: [
     {

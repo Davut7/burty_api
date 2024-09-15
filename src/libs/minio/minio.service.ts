@@ -22,14 +22,18 @@ export class MinioService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.createBucketIfNotExists();
+    try {
+      await this.createBucketIfNotExists();
+    } catch (error: any) {
+      this.logger.error(`Failed to create bucket on startup: ${error.message}`);
+    }
   }
 
   async createBucketIfNotExists() {
     const bucketExists = await this.minioClient.bucketExists(this.bucketName);
 
     if (!bucketExists) {
-      await this.minioClient.makeBucket(this.bucketName, this.bucketName);
+      await this.minioClient.makeBucket(this.bucketName, '');
       const publicPolicy = {
         Version: '2012-10-17',
         Statement: [
@@ -96,7 +100,7 @@ export class MinioService implements OnModuleInit {
 
     this.logger.log(`Retrieved file URL: ${url}`);
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'test') {
       return url;
     }
     return url.replace(

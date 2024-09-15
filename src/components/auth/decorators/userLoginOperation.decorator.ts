@@ -24,7 +24,7 @@ export function UserLoginOperation() {
     }),
     ApiBadRequestResponse({ description: 'User not verified.' }),
     ApiBadRequestResponse({ description: 'Invalid password!' }),
-    ApiNotFoundResponse({ description: 'User with phone number not found!' }),
+    ApiNotFoundResponse({ description: 'User with email not found!' }),
     UseGuards(ThrottlerGuard),
     PUBLIC(),
     UseInterceptors(

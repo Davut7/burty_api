@@ -3,22 +3,34 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nestjs_app
+    container_name: burty_app
     ports:
       - '5005:5005'
     depends_on:
-      - burty_postgres
-      - burty_minio
-      - burty_redis
+      burty_postgres:
+        condition: service_healthy
+      burty_redis:
+        condition: service_healthy
     restart: unless-stopped
     environment:
-      STARTUP_COMMAND: ${STARTUP_COMMAND}
+      NODE_ENV: ${ENVIRONMENT}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
     command: >
-      sh -c "${STARTUP_COMMAND}"
+      sh -c "
+      npm run prisma:migrate:deploy:${ENVIRONMENT} &&
+      npm run prisma:generate:${ENVIRONMENT} &&
+      node --max-old-space-size=2048 node_modules/.bin/nest start
+      "
+    mem_limit: 3g
+    mem_reservation: 1.5g
+    networks:
+      - my_network
 
   burty_postgres:
     image: postgres:latest
-    container_name: burty_postgres_db
+    container_name: burty_postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -29,6 +41,15 @@ services:
     ports:
       - '5432:5432'
     restart: unless-stopped
+    networks:
+      - my_network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 2g
+    mem_reservation: 1g
 
   burty_minio:
     image: minio/minio:latest
@@ -36,20 +57,37 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    command: server /data
+    command: server /data --console-address ":9001"
     ports:
       - '9000:9000'
+      - '9001:9001'
     volumes:
       - minio_data:/data
     restart: unless-stopped
+    networks:
+      - my_network
 
   burty_redis:
     image: redis:latest
     container_name: burty_redis
     ports:
       - '6379:6379'
+    volumes:
+      - redis_data:/data
     restart: unless-stopped
+    networks:
+      - my_network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pg_data:
   minio_data:
+  redis_data:
+
+networks:
+  my_network:
+    driver: bridge

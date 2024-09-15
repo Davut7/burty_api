@@ -13,7 +13,6 @@ export const redisClientFactory: FactoryProvider<Redis> = {
     redisInstance.on('error', (e) => {
       throw new Error(`Redis connection failed: ${e}`);
     });
-    console.log(configService.get('REDIS_HOST'));
     return redisInstance;
   },
   inject: [ConfigService],

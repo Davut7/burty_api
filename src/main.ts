@@ -76,7 +76,7 @@ async function bootstrap() {
     useGlobalPrefix: true,
   };
 
-  if (configService.get('ENVIRONMENT') !== 'production') {
+  if (configService.get('ENVIRONMENT') !== 'prod') {
     SwaggerModule.setup('api/docs', app, document, options);
   }
 
@@ -103,7 +103,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.setGlobalPrefix('api');
 
-  await app.listen(port, () => {
+  await app.listen(port, '0.0.0.0', () => {
     console.log(`Your server is listening on port ${port}`);
   });
 
