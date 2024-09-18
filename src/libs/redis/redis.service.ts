@@ -14,20 +14,16 @@ export class RedisService {
   tenMinutesInSeconds = this.configService.get('REDIS_ACCESS_TOKEN_TIME');
 
   async setTokenWithExpiry(key: string, token: string): Promise<void> {
-    this.logger.log(`Setting token ${token} with expiry for key: ${key}`);
     await this.redisRepository.setWithExpiry(
       'accessToken',
       key,
       token,
       +this.tenMinutesInSeconds,
     );
-    this.logger.log(`Token ${token} set with expiry for key: ${key}`);
   }
 
   async getRedisToken(token: string) {
-    this.logger.log(`Getting token from Redis: ${token}`);
     const retrievedToken = await this.redisRepository.get('accessToken', token);
-    this.logger.log(`Token ${token} retrieved from Redis`);
     return retrievedToken;
   }
 
@@ -35,22 +31,15 @@ export class RedisService {
     key: string,
     link: string,
   ): Promise<void> {
-    this.logger.log(
-      `Устанавливаем ссылка для сброса ${link} с истечением срока для ключа: ${key}`,
-    );
     await this.redisRepository.setWithExpiry(
       'resetPasswordLink',
       key,
       link,
       +this.tenMinutesInSeconds,
     );
-    this.logger.log(
-      `Ссылка ${link} установлена с истечением срока для ключа: ${key}`,
-    );
   }
 
   async getResetPasswordVerificationLink(key: string) {
-    this.logger.log(`Получаем ссылку из Redis для ключа: ${key}`);
     const retrievedLink = await this.redisRepository.get(
       'resetPasswordLink',
       key,

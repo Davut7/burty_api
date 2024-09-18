@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { $Enums, Users } from '@prisma/client';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
+import { MediaType } from './media.type';
 
 export class UsersType implements Users {
   @ApiProperty({
@@ -45,4 +46,11 @@ export class UsersType implements Users {
 
   @Exclude()
   isVerified: boolean;
+
+  @Type(() => MediaType)
+  @ApiProperty({ type: MediaType })
+  media?: MediaType;
+
+  @Exclude()
+  provider: $Enums.AuthProviders;
 }

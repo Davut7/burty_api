@@ -18,4 +18,14 @@ enum MediaType {
 enum UserRole {
   MENTOR
   USER
+
+  @@map("user_role")
+}
+
+enum AuthProviders {
+  google
+  email
+  facebook
+
+  @@map("auth_providers")
 }

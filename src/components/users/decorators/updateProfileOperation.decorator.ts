@@ -6,10 +6,10 @@ import {
 } from '@nestjs/swagger';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
 
-export function DeleteAccountOperation() {
+export function UpdateProfileOperation() {
   return applyDecorators(
+    ApiOperation({ description: 'Profile update operation!' }),
     ApiOkResponse({ type: SuccessMessageType }),
-    ApiOperation({ summary: 'Delete current account' }),
     ApiNotFoundResponse({ description: 'User not found!' }),
   );
 }

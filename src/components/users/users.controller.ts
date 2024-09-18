@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Delete,
   Get,
+  Patch,
   Post,
   UploadedFile,
 } from '@nestjs/common';
@@ -13,14 +15,36 @@ import { ITransformedFile } from 'src/common/interfaces/fileTransform.interface'
 import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
 import { UploadProfilePictureOperation } from './decorators/uploadProfilePictureOperation.decorator';
 import { DeleteProfilePictureOperation } from './decorators/deleteProfilePictureOperation.decorator';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DeleteAccountOperation } from './decorators/deleteAccountOperation.decorator';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
+import { UsersType } from 'src/helpers/types/users.type';
+import { GetMeOperation } from './decorators/getMeOperation.decorator';
+import { USER } from 'src/common/decorators/isUser.decorator';
+import { UpdateUserProfileDto } from './dto/updateUserProfile.dto';
+import { UpdateProfileOperation } from './decorators/updateProfileOperation.decorator';
 
 @ApiTags('users')
+@ApiBearerAuth()
+@USER()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('me')
+  @GetMeOperation()
+  async getMe(@CurrentUser() currentUser: UserTokenDto): Promise<UsersType> {
+    return await this.usersService.getMe(currentUser);
+  }
+
+  @Patch()
+  @UpdateProfileOperation()
+  async updateProfile(
+    @CurrentUser() currentUser: UserTokenDto,
+    @Body() dto: UpdateUserProfileDto,
+  ) {
+    return await this.usersService.updateProfile(currentUser, dto);
+  }
 
   @DeleteAccountOperation()
   @Delete()
@@ -31,12 +55,14 @@ export class UsersController {
   }
 
   @UploadProfilePictureOperation()
-  @Post('profile/image')
+  @Post('profile/picture')
   async uploadProfilePicture(
     @UploadedFile(ImageTransformer) file: ITransformedFile,
     @CurrentUser() currentUser: UserTokenDto,
   ): Promise<SuccessMessageType> {
-    if (!file) throw new BadRequestException('File not provided!');
+    if (!file) {
+      throw new BadRequestException('File not provided!');
+    }
     return await this.usersService.uploadProfilePicture(currentUser, file);
   }
 

@@ -13,6 +13,7 @@ export class UsersDto extends PickType(UsersType, [
   'email',
   'role',
   'userName',
+  'provider',
 ]) {
   @IsString()
   @IsEmail()
@@ -32,4 +33,8 @@ export class UsersDto extends PickType(UsersType, [
   @IsString()
   @IsNotEmpty()
   userName: string;
+
+  @IsNotEmpty()
+  @IsEnum($Enums.AuthProviders)
+  provider: $Enums.AuthProviders;
 }

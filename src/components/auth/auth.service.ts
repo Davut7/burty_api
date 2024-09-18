@@ -17,7 +17,7 @@ import { UserTokenDto } from '../token/dto/token.dto';
 import { UserVerificationDto } from './dto/userVerification.dto';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
-import { Users } from '@prisma/client';
+import { AuthProviders, Users } from '@prisma/client';
 import { generateResetPasswordLink } from 'src/helpers/providers/generateResetPasswordLink';
 import { UserRegistrationResponse } from './responses/userRegistration.response';
 import { UserForgotPasswordDto } from './dto/userForgotPassword.dto';
@@ -60,7 +60,12 @@ export class AuthService {
     try {
       return await this.prismaService.$transaction(async (prisma) => {
         const user = await prisma.users.create({
-          data: { email, password: hashedPassword, role },
+          data: {
+            email,
+            password: hashedPassword,
+            role,
+            provider: AuthProviders.email,
+          },
         });
 
         await this.redisService.setEmailVerificationWithExpiry(
@@ -103,7 +108,10 @@ export class AuthService {
 
     await this.tokenService.saveTokens(user.id, tokens.refreshToken);
 
-    return { user, message: 'Пользователь успешно подтвержден', ...tokens };
+    if (this.configService.get('ENVIRONMENT') !== 'prod') {
+      return { user, message: 'Пользователь успешно подтвержден', ...tokens };
+    }
+    return { user, message: 'Пользователь успешно подтвержден' };
   }
 
   async resendVerificationCode(
@@ -163,7 +171,10 @@ export class AuthService {
     await this.tokenService.saveTokens(user.id, tokens.refreshToken);
 
     this.logger.log('Успешный вход пользователя:', user);
-    return { message: 'Успешный вход пользователя!', user, ...tokens };
+    if (this.configService.get('ENVIRONMENT') !== 'prod') {
+      return { message: 'Успешный вход пользователя!', user, ...tokens };
+    }
+    return { message: 'Успешный вход пользователя!', user };
   }
 
   async logoutUser(refreshToken: string): Promise<SuccessMessageType> {
@@ -205,11 +216,11 @@ export class AuthService {
     await this.tokenService.saveTokens(user.id, tokens.refreshToken);
 
     this.logger.log('Токены успешно обновлены:');
-    return {
-      message: 'Токены успешно обновлены',
-      ...tokens,
-      user,
-    };
+
+    if (this.configService.get('ENVIRONMENT') !== 'prod') {
+      return { message: 'Токены успешно обновлены', user, ...tokens };
+    }
+    return { message: 'Токены успешно обновлены', user };
   }
 
   async forgotPassword(
@@ -341,19 +352,20 @@ export class AuthService {
     const verificationCode = await this.redisService.getEmailVerificationCode(
       `${user.id}:${user.email}`,
     );
-    if (!verificationCode)
+    if (!verificationCode) {
       throw new BadRequestException('Verification code is expired');
-    if (verificationCode !== dto.verificationCode)
+    }
+    if (verificationCode !== dto.verificationCode) {
       throw new BadRequestException('Verification code is wrong');
+    }
   }
 
   private async verifyUser(user: Users): Promise<UsersType> {
     this.logger.log('Верификация пользователя...');
-    const verifiedUser = await this.prismaService.users.update({
+    return await this.prismaService.users.update({
       where: { id: user.id },
       data: { isVerified: true },
     });
-    return verifiedUser;
   }
 
   private generateResetPasswordLink(user: Users, resetToken: string): string {

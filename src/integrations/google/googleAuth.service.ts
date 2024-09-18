@@ -60,21 +60,10 @@ export class GoogleAuthService {
         where: { email: user.email },
       });
 
-      if (!userFromDb) {
-        this.logger.log(
-          `Пользователь с email ${user.email} не найден, создаем нового пользователя...`,
-        );
-        userFromDb = await this.prismaService.users.create({
-          data: { email: user.email, userName: user.given_name || user.name },
-        });
-        this.logger.log(`Создан новый пользователь с ID ${userFromDb.id}`);
-      } else {
-        this.logger.log(`Пользователь с email ${user.email} уже существует`);
-      }
-
       const userRegistrationDto: UserSocialRegistrationDto = {
         userName: user.given_name || user.name,
         email: user.email,
+        provider: 'google',
       };
 
       return await this.authCommonService.loginOrRegistration(

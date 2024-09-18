@@ -9,7 +9,9 @@ import { UserTokenDto } from '../token/dto/token.dto';
 import { ITransformedFile } from 'src/common/interfaces/fileTransform.interface';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
 import { MediaService } from 'src/libs/media/media.service';
-import { MediaType } from '@prisma/client';
+import { UsersType } from 'src/helpers/types/users.type';
+import { UpdateUserProfileDto } from './dto/updateUserProfile.dto';
+import { generateHash } from 'src/helpers/providers/generateHash';
 
 @Injectable()
 export class UsersService {
@@ -20,34 +22,41 @@ export class UsersService {
     private mediaService: MediaService,
   ) {}
 
+  async getMe(currentUser: UserTokenDto): Promise<UsersType> {
+    const user = await this.prismaService.users.findUnique({
+      where: { id: currentUser.id, isDeleted: false },
+      include: { media: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    return user;
+  }
+
   async uploadProfilePicture(
     currentUser: UserTokenDto,
-    file: ITransformedFile,
+    image: ITransformedFile,
   ): Promise<SuccessMessageType> {
     this.logger.log(
       `Загрузка фото профиля для пользователя с ID: ${currentUser.id}`,
     );
     const user = await this.findUserById(currentUser.id);
 
-    if (user) {
-      const media = await this.prismaService.media.findFirst({
-        where: {
-          fileType: MediaType.IMAGE,
-        },
-      });
-      if (media) {
-        await this.mediaService.deleteOneMedia(media.id);
-      }
-      await this.mediaService.createFileMedia(file, user.id, 'specialistId');
-    } else {
-      const media = await this.prismaService.media.findFirst({
-        where: { clientId: currentUser.id, fileType: MediaType.IMAGE },
-      });
-      if (media) {
-        await this.mediaService.deleteOneMedia(media.id);
-      }
-      await this.mediaService.createFileMedia(file, currentUser.id, 'clientId');
+    if (user.media) {
+      await this.mediaService.deleteOneMedia(user.media.id);
+
+      await this.mediaService.createFileMedia(image, user.id, 'userId');
+
+      this.logger.log(
+        `Фото профиля успешно загружено для пользователя с ID: ${currentUser.id}`,
+      );
+
+      await this.mediaService.createFileMedia(image, user.id, 'userId');
     }
+
+    await this.mediaService.createFileMedia(image, user.id, 'userId');
     this.logger.log(
       `Фото профиля успешно загружено для пользователя с ID: ${currentUser.id}`,
     );
@@ -77,32 +86,48 @@ export class UsersService {
     );
     const user = await this.findUserById(currentUser.id);
 
-    const media = await this.prismaService.media.findFirst({
-      where: {
-        clientId: currentUser.id,
-        fileType: MediaType.IMAGE,
-      },
-    });
-    if (!media) {
+    if (user.media) {
+      await this.mediaService.deleteOneMedia(user.media.id);
+      this.logger.log(
+        `Фото профиля успешно удалено для пользователя с ID: ${currentUser.id}`,
+      );
+
+      return {
+        message: 'Profile picture deleted successfully',
+      };
+    }
+
+    if (!user.media) {
       this.logger.error(
         `Фото профиля уже удалено для пользователя с ID: ${currentUser.id}`,
       );
       throw new BadRequestException('You already deleted profile picture');
     }
-    await this.mediaService.deleteOneMedia(media.id);
-    this.logger.log(
-      `Фото профиля успешно удалено для пользователя с ID: ${currentUser.id}`,
-    );
+  }
 
-    return {
-      message: 'Profile picture deleted successfully',
-    };
+  async updateProfile(
+    currentUser: UserTokenDto,
+    dto: UpdateUserProfileDto,
+  ): Promise<SuccessMessageType> {
+    this.logger.log(`Обновление профиля пользователя с ID: ${currentUser.id}`);
+    const user = await this.findUserById(currentUser.id);
+
+    if (dto.password) {
+      dto.password = await generateHash(dto.password);
+    }
+    await this.prismaService.users.update({
+      where: { id: user.id },
+      data: { ...dto },
+    });
+
+    return { message: 'User profile updated successfully' };
   }
 
   private async findUserById(userId: string) {
     this.logger.log('Поиск пользователя по id');
     const user = await this.prismaService.users.findFirst({
       where: { id: userId },
+      include: { media: true },
     });
     if (!user) {
       this.logger.error(`Пользователя с ID: ${userId} не найден`);

@@ -1,6 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -13,7 +12,6 @@ export function DeleteProfilePictureOperation() {
       description: 'Profile picture deleted successfully',
       type: SuccessMessageType,
     }),
-    ApiBearerAuth(),
     ApiNotFoundResponse({ description: 'User not found' }),
     ApiOperation({ summary: 'Delete profile picture' }),
   );

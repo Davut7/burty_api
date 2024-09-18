@@ -1,0 +1,6 @@
+model Category {
+    id String @id @default(uuid()) @db.Uuid
+    title String
+
+    @@map("categories")
+}

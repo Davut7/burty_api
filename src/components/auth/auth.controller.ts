@@ -111,9 +111,7 @@ export class AuthController {
   @HttpCode(200)
   @Post('logout')
   async logout(@Cookies('refreshToken') refreshToken: string) {
-    const { message } = await this.authService.logoutUser(refreshToken);
-
-    return { message };
+    return await this.authService.logoutUser(refreshToken);
   }
 
   @ForgotPasswordOperation()
@@ -131,11 +129,7 @@ export class AuthController {
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: UserVerificationDto,
   ): Promise<UserForgotPasswordVerificationResponse> {
-    const { link, message } = await this.authService.forgotPasswordVerification(
-      dto,
-      userId,
-    );
-    return { link, message };
+    return await this.authService.forgotPasswordVerification(dto, userId);
   }
 
   @ResetPasswordOperation()
