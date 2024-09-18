@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { CustomHttpExceptionResponse } from './httpExceptionResponse.interface';
-import { unlink } from 'fs/promises';
 
 interface CustomRequest extends Request {
   currentUser?: any;

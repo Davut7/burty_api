@@ -8,13 +8,13 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserRegistrationDto } from './dto/userRegistration.dto';
 import { UserLoginDto } from './dto/userLogin.dto';
 import { UserVerificationDto } from './dto/userVerification.dto';
-import { Cookies } from 'src/common/decorators/getCookie.decorator';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { UserTokenDto } from '../token/dto/token.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -38,11 +38,17 @@ import { UserForgotPasswordResponse } from './responses/userForgotPassword.respo
 import { UserForgotPasswordVerificationResponse } from './responses/userForgotPasswordVerification.response';
 import { ValidateResetPasswordResponse } from './responses/validateResetPasswordLink.response';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
+import { UserRefreshTokenDto } from './dto/userRefreshToken.dto';
+import { RedisService } from 'src/libs/redis/redis.service';
+import { FastifyRequest } from 'fastify';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private redisService: RedisService,
+  ) {}
 
   @UserRegistrationOperation()
   @Post('registration')
@@ -58,14 +64,7 @@ export class AuthController {
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: UserVerificationDto,
   ): Promise<UserVerifyResponse> {
-    const { user, accessToken, refreshToken, message } =
-      await this.authService.userVerification(dto, userId);
-    return {
-      message,
-      user,
-      accessToken,
-      refreshToken,
-    };
+    return await this.authService.userVerification(dto, userId);
   }
 
   @ResendVerificationCodeOperation()
@@ -81,37 +80,29 @@ export class AuthController {
   @HttpCode(200)
   @Post('login')
   async userLogin(@Body() dto: UserLoginDto): Promise<UserLoginResponse> {
-    const { message, user, accessToken, refreshToken } =
-      await this.authService.userLogin(dto);
-    return {
-      message,
-      user,
-      accessToken,
-      refreshToken,
-    };
+    return await this.authService.userLogin(dto);
   }
 
   @UserRefreshOperation()
-  @Get('refresh')
+  @Post('refresh')
   async refresh(
-    @Cookies('refreshToken') requestRefreshToken: string,
+    @Body() dto: UserRefreshTokenDto,
   ): Promise<UserRefreshResponse> {
-    const { message, user, accessToken, refreshToken } =
-      await this.authService.refreshTokens(requestRefreshToken);
-
-    return {
-      message,
-      user,
-      accessToken,
-      refreshToken,
-    };
+    return await this.authService.refreshTokens(dto);
   }
 
-  @UserLogoutOperation()
-  @HttpCode(200)
   @Post('logout')
-  async logout(@Cookies('refreshToken') refreshToken: string) {
-    return await this.authService.logoutUser(refreshToken);
+  @HttpCode(200)
+  async logout(@Body() dto: UserRefreshTokenDto, @Req() req: FastifyRequest) {
+    const { headers } = req;
+
+    const authorizationHeader = headers.authorization;
+
+    const accessToken = authorizationHeader.split(' ')[1];
+
+    await this.redisService.setTokenWithExpiry(accessToken, accessToken);
+
+    return await this.authService.logoutUser(dto);
   }
 
   @ForgotPasswordOperation()

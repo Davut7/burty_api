@@ -31,6 +31,7 @@ import { ValidateResetPasswordResponse } from './responses/validateResetPassword
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
 import { RedisService } from 'src/libs/redis/redis.service';
 import { UsersType } from 'src/helpers/types/users.type';
+import { UserRefreshTokenDto } from './dto/userRefreshToken.dto';
 
 @Injectable()
 export class AuthService {
@@ -55,7 +56,7 @@ export class AuthService {
     await this.checkUserExistence(email);
 
     const hashedPassword = await generateHash(password);
-    const { code } = generateVerificationCodeAndExpiry();
+    const code = generateVerificationCodeAndExpiry();
 
     try {
       return await this.prismaService.$transaction(async (prisma) => {
@@ -108,10 +109,7 @@ export class AuthService {
 
     await this.tokenService.saveTokens(user.id, tokens.refreshToken);
 
-    if (this.configService.get('ENVIRONMENT') !== 'prod') {
-      return { user, message: 'Пользователь успешно подтвержден', ...tokens };
-    }
-    return { user, message: 'Пользователь успешно подтвержден' };
+    return { user, message: 'Пользователь успешно подтвержден', ...tokens };
   }
 
   async resendVerificationCode(
@@ -130,7 +128,7 @@ export class AuthService {
       throw new BadRequestException('Пользователь уже подтвержден');
     }
 
-    const { code } = generateVerificationCodeAndExpiry();
+    const code = generateVerificationCodeAndExpiry();
 
     await this.redisService.setEmailVerificationWithExpiry(
       `${user.id}:${user.email}`,
@@ -171,31 +169,28 @@ export class AuthService {
     await this.tokenService.saveTokens(user.id, tokens.refreshToken);
 
     this.logger.log('Успешный вход пользователя:', user);
-    if (this.configService.get('ENVIRONMENT') !== 'prod') {
-      return { message: 'Успешный вход пользователя!', user, ...tokens };
-    }
-    return { message: 'Успешный вход пользователя!', user };
+    return { message: 'Успешный вход пользователя!', user, ...tokens };
   }
 
-  async logoutUser(refreshToken: string): Promise<SuccessMessageType> {
-    if (!refreshToken) {
+  async logoutUser(dto: UserRefreshTokenDto): Promise<SuccessMessageType> {
+    if (!dto.refreshToken) {
       throw new UnauthorizedException('Refresh token not provided');
     }
 
-    await this.tokenService.deleteToken(refreshToken);
+    await this.tokenService.deleteToken(dto.refreshToken);
 
     return { message: 'User logged out' };
   }
 
-  async refreshTokens(refreshToken: string): Promise<UserRefreshResponse> {
+  async refreshTokens(dto: UserRefreshTokenDto): Promise<UserRefreshResponse> {
     this.logger.log('Попытка обновления токенов...');
-    if (!refreshToken) {
+    if (!dto.refreshToken) {
       this.logger.error('Не предоставлен обновляющий токен!');
       throw new UnauthorizedException('Refresh token not provided!');
     }
 
-    const tokenFromDB = await this.tokenService.findToken(refreshToken);
-    const validToken = this.tokenService.validateRefreshToken(refreshToken);
+    const tokenFromDB = await this.tokenService.findToken(dto.refreshToken);
+    const validToken = this.tokenService.validateRefreshToken(dto.refreshToken);
 
     if (!validToken || !tokenFromDB) {
       this.logger.error('Неверный токен!');
@@ -217,10 +212,7 @@ export class AuthService {
 
     this.logger.log('Токены успешно обновлены:');
 
-    if (this.configService.get('ENVIRONMENT') !== 'prod') {
-      return { message: 'Токены успешно обновлены', user, ...tokens };
-    }
-    return { message: 'Токены успешно обновлены', user };
+    return { message: 'Токены успешно обновлены', user, ...tokens };
   }
 
   async forgotPassword(
@@ -234,7 +226,7 @@ export class AuthService {
       throw new NotFoundException('User not found!');
     }
 
-    const { code } = generateVerificationCodeAndExpiry();
+    const code = generateVerificationCodeAndExpiry();
 
     await this.redisService.setEmailVerificationWithExpiry(
       `${user.id}:${user.email}`,

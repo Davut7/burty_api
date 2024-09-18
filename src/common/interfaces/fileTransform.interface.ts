@@ -7,7 +7,4 @@ export interface ITransformedFile {
   size: string;
   originalName: string;
   mediaType: MediaType;
-  productId?: string;
-  categoryId?: string;
-  shopId?: string;
 }

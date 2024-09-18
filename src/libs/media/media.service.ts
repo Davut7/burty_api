@@ -63,52 +63,6 @@ export class MediaService {
     return media.id;
   }
 
-  async createCategoryFileMedia(
-    file: ITransformedFile,
-    entityId: string,
-    entityColumn: string,
-  ) {
-    const mediaData: any = {
-      originalName: file.originalName,
-      fileName: file.fileName,
-      filePath: file.filePath,
-      mimeType: file.mimeType,
-      size: file.size,
-      mediaType: file.mediaType,
-      categoryId: file.categoryId,
-    };
-    mediaData[entityColumn] = entityId;
-
-    const media = await this.prismaService.media.create({
-      data: mediaData,
-    });
-
-    return media.id;
-  }
-
-  async createProductFileMedia(
-    file: ITransformedFile,
-    entityId: string,
-    entityColumn: string,
-  ) {
-    const mediaData: any = {
-      originalName: file.originalName,
-      fileName: file.fileName,
-      filePath: file.filePath,
-      mimeType: file.mimeType,
-      size: file.size,
-      mediaType: file.mediaType,
-      productId: file.productId,
-    };
-    mediaData[entityColumn] = entityId;
-
-    const media = await this.prismaService.media.create({
-      data: mediaData,
-    });
-
-    return media.id;
-  }
-
   async deleteMedias(fileIds: string[]) {
     this.logger.log(`Удаление медиа с идентификаторами: ${fileIds.join(', ')}`);
     const files = await this.prismaService.media.findMany({

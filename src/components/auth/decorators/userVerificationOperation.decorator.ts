@@ -8,7 +8,6 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { UserVerificationDto } from '../dto/userVerification.dto';
-import { SetCookieInterceptor } from 'src/common/interceptors/setCookie.interceptor';
 import { TransformDataInterceptor } from 'src/common/interceptors/transformData.interceptor';
 import { UserVerifyResponse } from '../responses/userVerify.response';
 import { PUBLIC } from 'src/common/decorators/isPublic.decorator';
@@ -25,10 +24,7 @@ export function UserVerificationOperation() {
     ApiBadRequestResponse({ description: 'Verification code mismatch' }),
     ApiBadRequestResponse({ description: 'Verification code expired!' }),
     ApiConflictResponse({ description: 'User already verified' }),
-    UseInterceptors(
-      SetCookieInterceptor,
-      new TransformDataInterceptor(UserVerifyResponse),
-    ),
+    UseInterceptors(new TransformDataInterceptor(UserVerifyResponse)),
     PUBLIC(),
   );
 }

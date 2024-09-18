@@ -8,7 +8,6 @@ import {
 } from '@nestjs/swagger';
 import { TransformDataInterceptor } from 'src/common/interceptors/transformData.interceptor';
 import { UserRefreshResponse } from '../responses/userRefresh.response';
-import { SetCookieInterceptor } from 'src/common/interceptors/setCookie.interceptor';
 import { PUBLIC } from 'src/common/decorators/isPublic.decorator';
 
 export function UserRefreshOperation() {
@@ -22,10 +21,7 @@ export function UserRefreshOperation() {
     ApiUnauthorizedResponse({ description: 'Refresh token not provided!' }),
     ApiUnauthorizedResponse({ description: 'Invalid token!' }),
     ApiNotFoundResponse({ description: 'User not found!' }),
-    UseInterceptors(
-      SetCookieInterceptor,
-      new TransformDataInterceptor(UserRefreshResponse),
-    ),
+    UseInterceptors(new TransformDataInterceptor(UserRefreshResponse)),
     PUBLIC(),
   );
 }

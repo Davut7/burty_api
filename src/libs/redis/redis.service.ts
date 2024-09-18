@@ -23,8 +23,7 @@ export class RedisService {
   }
 
   async getRedisToken(token: string) {
-    const retrievedToken = await this.redisRepository.get('accessToken', token);
-    return retrievedToken;
+    return await this.redisRepository.get('accessToken', token);
   }
 
   async setResetPasswordLinkWithExpiry(

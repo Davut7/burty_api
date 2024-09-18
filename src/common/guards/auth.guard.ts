@@ -50,7 +50,9 @@ export class AuthGuard implements CanActivate {
     ]);
 
     try {
-      if (isPublic) return true;
+      if (isPublic) {
+        return true
+      };
       const authHeader = req.headers.authorization;
       if (!authHeader) {
         this.logger.error('User unauthorized');
