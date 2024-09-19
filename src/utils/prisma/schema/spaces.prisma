@@ -1,0 +1,21 @@
+model Spaces {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  address     String
+  site        String
+  categoryId  String?  @map("category_id") @db.Uuid
+  phoneNumber String   @map("phone_number")
+  openTime    DateTime @map("open_time")
+  endTime     DateTime @map("end_time")
+  longitude   String
+  latitude    String
+  minPrice    Float    @map("min_price")
+  maxPrice    Float    @map("max_price")
+  minPlayers  Int      @map("min_players")
+  maxPlayers  Int      @map("max_players")
+  category    Category? @relation(fields: [categoryId], references: [id])
+  reviews     Reviews[]
+  bookings Bookings[]
+
+  @@map("spaces")
+}

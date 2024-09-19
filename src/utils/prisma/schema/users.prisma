@@ -1,5 +1,5 @@
 model Users {
-     id String @id @default(uuid()) @db.Uuid
+    id String @id @default(uuid()) @db.Uuid
     email String @unique
     password String?
     role UserRole?
@@ -10,8 +10,11 @@ model Users {
     updatedAt DateTime? @map("updated_at") 
     isDeleted Boolean @map("is_deleted") @default(false)
     provider AuthProviders
-    token UserTokens?
-    media Media?
+    token   UserTokens?
+    media   Media?
+    comments Comments[]
+    reviews Reviews[]
+    bookings Bookings[]
 
      @@map("users")
 }

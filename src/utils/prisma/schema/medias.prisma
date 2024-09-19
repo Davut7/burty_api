@@ -6,7 +6,7 @@ model Media {
     mimeType     String                @map("mime_type")
     originalName String                @map("original_name")
     userId       String?               @unique @map("user_id") @db.Uuid
-    mediaType     MediaType              @map("media_type")
+    mediaType     MediaType            @map("media_type")
     createdAt    DateTime?             @default(now()) @map("created_at")
     updatedAt    DateTime?             @updatedAt @map("updated_at")
     user Users? @relation(fields: [userId], references: [id], onDelete: Cascade)

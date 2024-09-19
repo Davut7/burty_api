@@ -29,3 +29,10 @@ enum AuthProviders {
 
   @@map("auth_providers")
 }
+
+enum PassType {
+  single
+  duo
+  squad
+  team
+}

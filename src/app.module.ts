@@ -18,6 +18,10 @@ import { TokenModule } from './components/token/token.module';
 import { UsersModule } from './components/users/users.module';
 import { AuthCommonModule } from './components/common/authCommon/authCommon.module';
 import { CategoryModule } from './components/category/category.module';
+import { SpacesModule } from './components/spaces/spaces.module';
+import { SpaceCommonModule } from './components/common/spaceCommon/spaceCommon.module';
+import { CategoryCommonModule } from './components/common/categoryCommon/categoryCommon.module';
+import { ReviewsModule } from './components/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -48,6 +52,10 @@ import { CategoryModule } from './components/category/category.module';
     UsersModule,
     AuthCommonModule,
     CategoryModule,
+    SpacesModule,
+    CategoryCommonModule,
+    SpaceCommonModule,
+    ReviewsModule,
   ],
   providers: [
     {

@@ -1,0 +1,11 @@
+model Comments {
+    id String @id @default(uuid()) @db.Uuid
+    comment String
+    createdAt String @map("created_at")
+    userId String @map("user_id") @db.Uuid
+    bookingId String @map("booking_id") @db.Uuid
+    user Users @relation(fields: [userId], references: [id])
+    booking Bookings @relation(fields: [bookingId], references: [id])
+
+    @@map("comments")
+}
