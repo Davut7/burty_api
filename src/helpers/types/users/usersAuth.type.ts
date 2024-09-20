@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { $Enums, Users } from '@prisma/client';
-import { Exclude, Type } from 'class-transformer';
-import { MediaType } from './media.type';
+import { Exclude } from 'class-transformer';
 
-export class UsersType implements Users {
+export class UsersAuthType implements Users {
   @ApiProperty({
     description: 'Уникальный идентификатор пользователя',
     example: '123e4567-e89b-12d3-a456-426614174000',
@@ -27,7 +26,10 @@ export class UsersType implements Users {
   role: $Enums.UserRole;
 
   @ApiProperty({ description: 'Имя пользователя', example: 'Иван' })
-  userName: string;
+  firstName: string;
+
+  @ApiProperty({ description: 'Фамилия пользователя', example: 'Иван' })
+  lastName: string;
 
   @Exclude()
   isDeleted: boolean;
@@ -46,10 +48,6 @@ export class UsersType implements Users {
 
   @Exclude()
   isVerified: boolean;
-
-  @Type(() => MediaType)
-  @ApiProperty({ type: MediaType })
-  media?: MediaType;
 
   @Exclude()
   provider: $Enums.AuthProviders;

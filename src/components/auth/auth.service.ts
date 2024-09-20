@@ -30,8 +30,8 @@ import { UserForgotPasswordVerificationResponse } from './responses/userForgotPa
 import { ValidateResetPasswordResponse } from './responses/validateResetPasswordLink.response';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
 import { RedisService } from 'src/libs/redis/redis.service';
-import { UsersType } from 'src/helpers/types/users.type';
 import { UserRefreshTokenDto } from './dto/userRefreshToken.dto';
+import { UsersType } from 'src/helpers/types/users/users.type';
 
 @Injectable()
 export class AuthService {

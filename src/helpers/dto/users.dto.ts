@@ -1,6 +1,5 @@
 import { $Enums } from '@prisma/client';
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { UsersType } from '../types/users.type';
 import {
   IsEmail,
   IsEnum,
@@ -8,11 +7,13 @@ import {
   IsString,
   IsStrongPassword,
 } from 'class-validator';
+import { UsersType } from '../types/users/users.type';
 
 export class UsersDto extends PickType(UsersType, [
   'email',
   'role',
-  'userName',
+  'firstName',
+  'lastName',
   'provider',
 ]) {
   @IsString()
@@ -32,7 +33,11 @@ export class UsersDto extends PickType(UsersType, [
 
   @IsString()
   @IsNotEmpty()
-  userName: string;
+  firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
 
   @IsNotEmpty()
   @IsEnum($Enums.AuthProviders)

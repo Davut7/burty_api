@@ -1,18 +1,15 @@
 import { PickType, ApiProperty } from '@nestjs/swagger';
 import {
-  IsArray,
   IsEnum,
   IsNumber,
   IsOptional,
   IsPositive,
   IsString,
-  ArrayNotEmpty,
-  Matches,
   IsNotEmpty,
   IsLongitude,
   IsLatitude,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { PassTypeEnum } from 'src/helpers/constants/passType.enum';
 import { PageOptionsDto } from 'src/helpers/dto/page.dto';
 
@@ -22,18 +19,6 @@ export class GetSpacesByFilterQuery extends PickType(PageOptionsDto, [
   'q',
 ] as const) {
   @ApiProperty({
-    description: 'List of category IDs to filter spaces by.',
-    type: [String],
-    example: ['123', '456'],
-    required: false,
-  })
-  @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true })
-  categoryIds: string[];
-
-  @ApiProperty({
     description: 'The longitude of the location.',
     example: '34.052235',
     type: String,
@@ -41,7 +26,8 @@ export class GetSpacesByFilterQuery extends PickType(PageOptionsDto, [
   @IsNotEmpty()
   @IsString()
   @IsLongitude()
-  longitude: string;
+  @Transform(({ value }) => parseFloat(value))
+  longitude: number;
 
   @ApiProperty({
     description: 'The latitude of the location.',
@@ -51,7 +37,8 @@ export class GetSpacesByFilterQuery extends PickType(PageOptionsDto, [
   @IsNotEmpty()
   @IsString()
   @IsLatitude()
-  latitude: string;
+  @Transform(({ value }) => parseFloat(value))
+  latitude: number;
 
   @ApiProperty({
     description:
@@ -99,17 +86,4 @@ export class GetSpacesByFilterQuery extends PickType(PageOptionsDto, [
   @IsPositive()
   @Type(() => Number)
   maxPrice: number;
-
-  @ApiProperty({
-    description: 'Visit time range in HH:MM-HH:MM format.',
-    type: String,
-    example: '14:00-15:00',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  @Matches(/^([0-1]\d|2[0-3]):([0-5]\d)-([0-1]\d|2[0-3]):([0-5]\d)$/, {
-    message: 'visitTime must be in HH:MM-HH:MM format',
-  })
-  visitTime: string;
 }

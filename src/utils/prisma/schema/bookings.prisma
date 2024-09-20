@@ -7,6 +7,7 @@ model Bookings {
     price Float
     playersCount Int @map("players_count")
     createdAt DateTime @map("created_at")
+    status BookingStatus
     userId String @map("user_id") @db.Uuid
     spaceId String @map("space_id") @db.Uuid
     user Users @relation(references: [id], fields: [userId])

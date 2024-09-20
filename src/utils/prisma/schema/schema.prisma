@@ -36,3 +36,11 @@ enum PassType {
   squad
   team
 }
+
+enum BookingStatus {
+  pending
+  paid
+  cancelled
+
+  @@map("booking_status")
+}

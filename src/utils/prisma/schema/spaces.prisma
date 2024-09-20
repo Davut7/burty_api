@@ -7,8 +7,8 @@ model Spaces {
   phoneNumber String   @map("phone_number")
   openTime    DateTime @map("open_time")
   endTime     DateTime @map("end_time")
-  longitude   String
-  latitude    String
+  longitude   Float
+  latitude    Float
   minPrice    Float    @map("min_price")
   maxPrice    Float    @map("max_price")
   minPlayers  Int      @map("min_players")

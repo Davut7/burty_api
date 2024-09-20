@@ -22,6 +22,7 @@ import { SpacesModule } from './components/spaces/spaces.module';
 import { SpaceCommonModule } from './components/common/spaceCommon/spaceCommon.module';
 import { CategoryCommonModule } from './components/common/categoryCommon/categoryCommon.module';
 import { ReviewsModule } from './components/reviews/reviews.module';
+import { BookingModule } from './components/booking/booking.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ReviewsModule } from './components/reviews/reviews.module';
     CategoryCommonModule,
     SpaceCommonModule,
     ReviewsModule,
+    BookingModule,
   ],
   providers: [
     {

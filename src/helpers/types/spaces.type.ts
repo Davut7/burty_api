@@ -22,10 +22,10 @@ export class SpacesType implements Spaces {
   endTime: Date;
 
   @ApiProperty({ description: 'Latitude of the space location' })
-  latitude: string;
+  latitude: number;
 
   @ApiProperty({ description: 'Longitude of the space location' })
-  longitude: string;
+  longitude: number;
 
   @ApiProperty({
     description: 'Maximum number of players allowed in the space',

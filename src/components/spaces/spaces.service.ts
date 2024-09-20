@@ -2,12 +2,40 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { GetNearbySpacesQuery } from './query/getNearbySpaces.query';
 import { GetSpacesByFilterQuery } from './query/getSpacesByFilter.query';
+import { SpacesType } from 'src/helpers/types/spaces.type';
+import { GetOneSpaceQuery } from './query/getOneSpace.query';
+import { GetSpacesResponse } from './responses/getSpaces.response';
 
 @Injectable()
 export class SpacesService {
+  private earthRadius = 6371;
   constructor(private prismaService: PrismaService) {}
 
-  async getNearbySpaces(query: GetNearbySpacesQuery) {
+  private calculateDistance(
+    latitude: number,
+    longitude: number,
+    spaceLat: number,
+    spaceLon: number,
+  ): number {
+    return +(
+      this.earthRadius *
+      Math.acos(
+        Math.cos(this.toRadians(latitude)) *
+          Math.cos(this.toRadians(spaceLat)) *
+          Math.cos(this.toRadians(spaceLon) - this.toRadians(longitude)) +
+          Math.sin(this.toRadians(latitude)) *
+            Math.sin(this.toRadians(spaceLat)),
+      )
+    );
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
+  async getNearbySpaces(
+    query: GetNearbySpacesQuery,
+  ): Promise<GetSpacesResponse[]> {
     const {
       latitude,
       longitude,
@@ -15,36 +43,26 @@ export class SpacesService {
       take = 10,
       maxDistance = 10,
     } = query;
-    const earthRadius = 6371;
+    const spaces = await this.prismaService.spaces.findMany({
+      skip: (page - 1) * take,
+      take,
+    });
 
-    return await this.prismaService.$queryRaw`
-      SELECT *, 
-        (
-          ${earthRadius} * acos(
-            cos(radians(${latitude})) * 
-            cos(radians(latitude)) * 
-            cos(radians(longitude) - radians(${longitude})) + 
-            sin(radians(${latitude})) * 
-            sin(radians(latitude))
-          )
-        ) AS distance
-      FROM "Spaces"
-      WHERE 
-        (
-          ${earthRadius} * acos(
-            cos(radians(${latitude})) * 
-            cos(radians(latitude)) * 
-            cos(radians(longitude) - radians(${longitude})) + 
-            sin(radians(${latitude})) * 
-            sin(radians(latitude))
-          )
-        ) < ${maxDistance}
-      ORDER BY distance
-      LIMIT ${take} OFFSET ${(page - 1) * take};
-    `;
+    return spaces
+      .map((space) => ({
+        ...space,
+        distance: this.calculateDistance(
+          latitude,
+          longitude,
+          space.latitude,
+          space.longitude,
+        ),
+      }))
+      .filter((space) => space.distance <= maxDistance)
+      .sort((a, b) => a.distance - b.distance);
   }
 
-  async getPopularSpaces(query: GetNearbySpacesQuery) {
+  async getPopularSpaces(query: GetNearbySpacesQuery): Promise<SpacesType[]> {
     const {
       latitude,
       longitude,
@@ -52,40 +70,41 @@ export class SpacesService {
       take = 10,
       maxDistance = 10,
     } = query;
-    const earthRadius = 6371;
 
-    return await this.prismaService.$queryRaw`
-      SELECT 
-        s.*, 
-        COALESCE(AVG(r.star), 0) AS average_rating,
-        (
-          ${earthRadius} * acos(
-            cos(radians(${latitude})) * 
-            cos(radians(s.latitude)) * 
-            cos(radians(s.longitude) - radians(${longitude})) + 
-            sin(radians(${latitude})) * 
-            sin(radians(s.latitude))
-          )
-        ) AS distance
-      FROM "Spaces" s
-      LEFT JOIN "Reviews" r ON s.id = r.spaceId
-      WHERE 
-        (
-          ${earthRadius} * acos(
-            cos(radians(${latitude})) * 
-            cos(radians(s.latitude)) * 
-            cos(radians(s.longitude) - radians(${longitude})) + 
-            sin(radians(${latitude})) * 
-            sin(radians(s.latitude))
-          )
-        ) < ${maxDistance}
-      GROUP BY s.id
-      ORDER BY average_rating DESC, distance ASC
-      LIMIT ${take} OFFSET ${(page - 1) * take};
-    `;
+    const spaces = await this.prismaService.spaces.findMany({
+      take,
+      skip: (page - 1) * take,
+      include: {
+        reviews: true,
+      },
+    });
+
+    return spaces
+      .map((space) => ({
+        ...space,
+        average_rating: space.reviews.length
+          ? space.reviews.reduce((sum, review) => sum + review.rating, 0) /
+            space.reviews.length
+          : 0,
+        distance: this.calculateDistance(
+          latitude,
+          longitude,
+          space.latitude,
+          space.longitude,
+        ),
+      }))
+      .filter((space) => space.distance <= maxDistance)
+      .sort((a, b) => {
+        if (a.average_rating === b.average_rating) {
+          return a.distance - b.distance;
+        }
+        return b.average_rating - a.average_rating;
+      });
   }
 
-  async getSpacesByFilter(query: GetSpacesByFilterQuery) {
+  async getSpacesByFilter(
+    query: GetSpacesByFilterQuery,
+  ): Promise<SpacesType[]> {
     const {
       take = 10,
       page = 1,
@@ -95,26 +114,16 @@ export class SpacesService {
       longitude,
       minPrice,
       passType,
-      visitTime,
       q = '',
-      categoryIds,
     } = query;
 
     const where: any = {};
-
     if (q) {
       where.OR = [
         { name: { contains: q, mode: 'insensitive' } },
         { description: { contains: q, mode: 'insensitive' } },
       ];
     }
-
-    if (categoryIds && categoryIds.length > 0) {
-      where.categoryId = {
-        in: categoryIds,
-      };
-    }
-
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
       if (minPrice !== undefined) {
@@ -124,89 +133,35 @@ export class SpacesService {
         where.price.lte = maxPrice;
       }
     }
-
     if (passType) {
       where.passType = passType;
     }
 
-    if (visitTime) {
-      const [startTime, endTime] = visitTime.split('-');
-      where.AND = [
-        { availableFrom: { lte: startTime } },
-        { availableTo: { gte: endTime } },
-      ];
-    }
+    const spaces = await this.prismaService.spaces.findMany({
+      where,
+      take,
+      skip: (page - 1) * take,
+    });
 
-    const earthRadius = 6371;
-    return await this.prismaService.$queryRaw`
-      SELECT *, 
-        (
-          ${earthRadius} * acos(
-            cos(radians(${latitude})) * 
-            cos(radians(latitude)) * 
-            cos(radians(longitude) - radians(${longitude})) + 
-            sin(radians(${latitude})) * 
-            sin(radians(latitude))
-          )
-        ) AS distance
-      FROM "Spaces"
-      WHERE 
-        (
-          ${earthRadius} * acos(
-            cos(radians(${latitude})) * 
-            cos(radians(latitude)) * 
-            cos(radians(longitude) - radians(${longitude})) + 
-            sin(radians(${latitude})) * 
-            sin(radians(latitude))
-          )
-        ) < ${maxDistance}
-        AND ${this.generateWhereClause(where)}
-      ORDER BY distance
-      LIMIT ${take} OFFSET ${(page - 1) * take};
-    `;
+    return spaces
+      .map((space) => ({
+        ...space,
+        distance: this.calculateDistance(
+          latitude,
+          longitude,
+          space.latitude,
+          space.longitude,
+        ),
+      }))
+      .filter((space) => space.distance <= maxDistance)
+      .sort((a, b) => a.distance - b.distance);
   }
 
-  private generateWhereClause(where: any): string {
-    const conditions: string[] = [];
-
-    if (where.categoryId) {
-      conditions.push(
-        `categoryId IN (${where.categoryId.in.map((id: string) => `'${id}'`).join(',')})`,
-      );
-    }
-
-    if (where.price) {
-      if (where.price.gte !== undefined) {
-        conditions.push(`price >= ${where.price.gte}`);
-      }
-      if (where.price.lte !== undefined) {
-        conditions.push(`price <= ${where.price.lte}`);
-      }
-    }
-
-    if (where.passType) {
-      conditions.push(`passType = '${where.passType}'`);
-    }
-
-    if (where.AND) {
-      conditions.push(
-        `availableFrom <= '${where.AND[0].availableFrom.lte}' AND availableTo >= '${where.AND[1].availableTo.gte}'`,
-      );
-    }
-
-    if (where.OR) {
-      conditions.push(
-        `(${where.OR.map(
-          (condition: any) =>
-            `name ILIKE '%${condition.name.contains}%' OR description ILIKE '%${condition.description.contains}%'`,
-        ).join(' OR ')})`,
-      );
-    }
-
-    return conditions.length > 0 ? `${conditions.join(' AND ')}` : '1=1';
-  }
-
-  async getOneSpace(spaceId: string) {
+  async getOneSpace(
+    spaceId: string,
+    query: GetOneSpaceQuery,
+  ): Promise<GetSpacesResponse> {
+    const { latitude, longitude } = query;
     const space = await this.prismaService.spaces.findUnique({
       where: { id: spaceId },
     });
@@ -215,6 +170,14 @@ export class SpacesService {
       throw new NotFoundException('Space not found!');
     }
 
-    return space;
+    return {
+      ...space,
+      distance: this.calculateDistance(
+        latitude,
+        longitude,
+        space.latitude,
+        space.longitude,
+      ),
+    };
   }
 }

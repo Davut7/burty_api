@@ -1,4 +1,5 @@
 import { PickType, ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsLatitude,
   IsLongitude,
@@ -21,7 +22,8 @@ export class GetNearbySpacesQuery extends PickType(PageOptionsDto, [
   @IsNotEmpty()
   @IsString()
   @IsLongitude()
-  longitude: string;
+  @Transform(({ value }) => parseFloat(value))
+  longitude: number;
 
   @ApiProperty({
     description: 'The latitude of the location.',
@@ -31,7 +33,8 @@ export class GetNearbySpacesQuery extends PickType(PageOptionsDto, [
   @IsNotEmpty()
   @IsString()
   @IsLatitude()
-  latitude: string;
+  @Transform(({ value }) => parseFloat(value))
+  latitude: number;
 
   @ApiProperty({
     description:

@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
 import axios from 'axios';
 import { FacebookLoginResponse } from './response/facebookLogin.response';
 import { AuthCommonService } from 'src/components/common/authCommon/authCommon.service';
@@ -11,7 +10,6 @@ export class FacebookAuthService {
   private readonly logger = new Logger(FacebookAuthService.name);
 
   constructor(
-    private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
     private readonly authCommonService: AuthCommonService,
   ) {}
@@ -50,7 +48,7 @@ export class FacebookAuthService {
       const userResponse = await axios.get(`https://graph.facebook.com/me`, {
         params: {
           access_token: accessToken,
-          fields: 'id,name,email,picture',
+          fields: 'id,name,email,picture,first_name,last_name',
         },
       });
 
@@ -66,7 +64,8 @@ export class FacebookAuthService {
       this.logger.log(`Получен пользователь от Facebook: ${user.email}`);
 
       const userRegistrationDto: UserSocialRegistrationDto = {
-        userName: user.given_name || user.name,
+        firstName: user.first_name,
+        lastName: user.last_name,
         email: user.email,
         provider: 'facebook',
       };

@@ -8,7 +8,7 @@ import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
 
 export function UpdateProfileOperation() {
   return applyDecorators(
-    ApiOperation({ description: 'Profile update operation!' }),
+    ApiOperation({ summary: 'Profile update operation!' }),
     ApiOkResponse({ type: SuccessMessageType }),
     ApiNotFoundResponse({ description: 'User not found!' }),
   );

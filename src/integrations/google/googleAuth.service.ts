@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { google } from 'googleapis';
 import { UserSocialRegistrationDto } from 'src/components/auth/dto/userSocialRegistration.dto';
 import { AuthCommonService } from 'src/components/common/authCommon/authCommon.service';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
 
 @Injectable()
 export class GoogleAuthService {
@@ -12,7 +11,6 @@ export class GoogleAuthService {
   scopes = ['https://www.googleapis.com/auth/userinfo.profile'];
 
   constructor(
-    private prismaService: PrismaService,
     private configService: ConfigService,
     private authCommonService: AuthCommonService,
   ) {
@@ -24,12 +22,11 @@ export class GoogleAuthService {
   }
 
   getAuthUrl() {
-    const url = this.oauth2Client.generateAuthUrl({
+    return this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: this.scopes,
       include_granted_scopes: true,
     });
-    return url;
   }
 
   async googleLogin(code: string) {
@@ -56,12 +53,9 @@ export class GoogleAuthService {
 
       this.logger.log(`Получен пользователь от Google: ${user.email}`);
 
-      let userFromDb = await this.prismaService.users.findUnique({
-        where: { email: user.email },
-      });
-
       const userRegistrationDto: UserSocialRegistrationDto = {
-        userName: user.given_name || user.name,
+        firstName: user.given_name,
+        lastName: user.family_name,
         email: user.email,
         provider: 'google',
       };

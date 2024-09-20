@@ -18,11 +18,11 @@ import { DeleteProfilePictureOperation } from './decorators/deleteProfilePicture
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DeleteAccountOperation } from './decorators/deleteAccountOperation.decorator';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
-import { UsersType } from 'src/helpers/types/users.type';
 import { GetMeOperation } from './decorators/getMeOperation.decorator';
 import { USER } from 'src/common/decorators/isUser.decorator';
 import { UpdateUserProfileDto } from './dto/updateUserProfile.dto';
 import { UpdateProfileOperation } from './decorators/updateProfileOperation.decorator';
+import { UsersType } from 'src/helpers/types/users/users.type';
 
 @ApiTags('users')
 @ApiBearerAuth()

@@ -9,9 +9,9 @@ import { UserTokenDto } from '../token/dto/token.dto';
 import { ITransformedFile } from 'src/common/interfaces/fileTransform.interface';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
 import { MediaService } from 'src/libs/media/media.service';
-import { UsersType } from 'src/helpers/types/users.type';
 import { UpdateUserProfileDto } from './dto/updateUserProfile.dto';
 import { generateHash } from 'src/helpers/providers/generateHash';
+import { UsersType } from 'src/helpers/types/users/users.type';
 
 @Injectable()
 export class UsersService {

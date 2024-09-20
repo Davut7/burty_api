@@ -3,6 +3,7 @@ import { PickType } from '@nestjs/swagger';
 
 export class UserSocialRegistrationDto extends PickType(UsersDto, [
   'email',
-  'userName',
+  'firstName',
+  'lastName',
   'provider',
 ]) {}
