@@ -16,8 +16,8 @@ export class SpacesService {
     longitude: number,
     spaceLat: number,
     spaceLon: number,
-  ): number {
-    return +(
+  ): { kilometers: number; meters: number } {
+    const distanceInKm = +(
       this.earthRadius *
       Math.acos(
         Math.cos(this.toRadians(latitude)) *
@@ -27,6 +27,13 @@ export class SpacesService {
             Math.sin(this.toRadians(spaceLat)),
       )
     );
+
+    const distanceInMeters = distanceInKm * 1000;
+
+    return {
+      kilometers: distanceInKm,
+      meters: distanceInMeters,
+    };
   }
 
   private toRadians(degrees: number): number {
@@ -49,17 +56,21 @@ export class SpacesService {
     });
 
     return spaces
-      .map((space) => ({
-        ...space,
-        distance: this.calculateDistance(
+      .map((space) => {
+        const { kilometers, meters } = this.calculateDistance(
           latitude,
           longitude,
           space.latitude,
           space.longitude,
-        ),
-      }))
-      .filter((space) => space.distance <= maxDistance)
-      .sort((a, b) => a.distance - b.distance);
+        );
+        return {
+          ...space,
+          distanceInKm: kilometers,
+          distanceInM: meters,
+        };
+      })
+      .filter((space) => space.distanceInKm <= maxDistance)
+      .sort((a, b) => a.distanceInKm - b.distanceInM);
   }
 
   async getPopularSpaces(query: GetNearbySpacesQuery): Promise<SpacesType[]> {
@@ -80,23 +91,29 @@ export class SpacesService {
     });
 
     return spaces
-      .map((space) => ({
-        ...space,
-        average_rating: space.reviews.length
-          ? space.reviews.reduce((sum, review) => sum + review.rating, 0) /
-            space.reviews.length
-          : 0,
-        distance: this.calculateDistance(
+      .map((space) => {
+        const { kilometers, meters } = this.calculateDistance(
           latitude,
           longitude,
           space.latitude,
           space.longitude,
-        ),
-      }))
-      .filter((space) => space.distance <= maxDistance)
+        );
+        return {
+          ...space,
+          average_rating: space.reviews.length
+            ? space.reviews.reduce((sum, review) => sum + review.rating, 0) /
+              space.reviews.length
+            : 0,
+          distance: {
+            kilometers,
+            meters,
+          },
+        };
+      })
+      .filter((space) => space.distance.kilometers <= maxDistance)
       .sort((a, b) => {
         if (a.average_rating === b.average_rating) {
-          return a.distance - b.distance;
+          return a.distance.kilometers - b.distance.kilometers;
         }
         return b.average_rating - a.average_rating;
       });
@@ -144,17 +161,23 @@ export class SpacesService {
     });
 
     return spaces
-      .map((space) => ({
-        ...space,
-        distance: this.calculateDistance(
+      .map((space) => {
+        const { kilometers, meters } = this.calculateDistance(
           latitude,
           longitude,
           space.latitude,
           space.longitude,
-        ),
-      }))
-      .filter((space) => space.distance <= maxDistance)
-      .sort((a, b) => a.distance - b.distance);
+        );
+        return {
+          ...space,
+          distance: {
+            kilometers,
+            meters,
+          },
+        };
+      })
+      .filter((space) => space.distance.kilometers <= maxDistance)
+      .sort((a, b) => a.distance.kilometers - b.distance.kilometers);
   }
 
   async getOneSpace(
@@ -170,14 +193,17 @@ export class SpacesService {
       throw new NotFoundException('Space not found!');
     }
 
+    const { kilometers, meters } = this.calculateDistance(
+      latitude,
+      longitude,
+      space.latitude,
+      space.longitude,
+    );
+
     return {
       ...space,
-      distance: this.calculateDistance(
-        latitude,
-        longitude,
-        space.latitude,
-        space.longitude,
-      ),
+      distanceInKm: kilometers,
+      distanceInM: meters,
     };
   }
 }

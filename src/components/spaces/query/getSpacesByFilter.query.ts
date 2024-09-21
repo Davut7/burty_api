@@ -23,8 +23,6 @@ export class GetSpacesByFilterQuery extends PickType(PageOptionsDto, [
     example: '34.052235',
     type: String,
   })
-  @IsNotEmpty()
-  @IsString()
   @IsLongitude()
   @Transform(({ value }) => parseFloat(value))
   longitude: number;
@@ -34,8 +32,6 @@ export class GetSpacesByFilterQuery extends PickType(PageOptionsDto, [
     example: '-118.243683',
     type: String,
   })
-  @IsNotEmpty()
-  @IsString()
   @IsLatitude()
   @Transform(({ value }) => parseFloat(value))
   latitude: number;

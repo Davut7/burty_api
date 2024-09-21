@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsLatitude, IsLongitude, IsNotEmpty, IsString } from 'class-validator';
+import { IsLatitude, IsLongitude } from 'class-validator';
 
 export class GetOneSpaceQuery {
   @ApiProperty({
@@ -8,8 +8,6 @@ export class GetOneSpaceQuery {
     example: '34.052235',
     type: String,
   })
-  @IsNotEmpty()
-  @IsString()
   @IsLongitude()
   @Transform(({ value }) => parseFloat(value))
   longitude: number;
@@ -19,8 +17,6 @@ export class GetOneSpaceQuery {
     example: '-118.243683',
     type: String,
   })
-  @IsNotEmpty()
-  @IsString()
   @IsLatitude()
   @Transform(({ value }) => parseFloat(value))
   latitude: number;

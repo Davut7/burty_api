@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsPositive,
   IsString,
+  IsOptional
 } from 'class-validator';
 import { PageOptionsDto } from 'src/helpers/dto/page.dto';
 
@@ -20,7 +21,6 @@ export class GetNearbySpacesQuery extends PickType(PageOptionsDto, [
     type: String,
   })
   @IsNotEmpty()
-  @IsString()
   @IsLongitude()
   @Transform(({ value }) => parseFloat(value))
   longitude: number;
@@ -31,7 +31,6 @@ export class GetNearbySpacesQuery extends PickType(PageOptionsDto, [
     type: String,
   })
   @IsNotEmpty()
-  @IsString()
   @IsLatitude()
   @Transform(({ value }) => parseFloat(value))
   latitude: number;
@@ -44,6 +43,7 @@ export class GetNearbySpacesQuery extends PickType(PageOptionsDto, [
     required: false,
     default: 10,
   })
+  @IsOptional()
   @IsNumber()
   @IsPositive()
   maxDistance: number;
