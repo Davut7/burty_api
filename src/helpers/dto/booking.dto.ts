@@ -5,18 +5,14 @@ import { IsEnum, IsNotEmpty } from 'class-validator';
 import { IsValidStartDate } from 'src/common/decorators/isValidDate.decorator';
 import { IsValidVisitTime } from 'src/common/decorators/isValidVisitTime.decorator';
 
-export class BookingDto extends PickType(BookingType, [
-  'passType',
-  'startDate',
-  'visitTime',
-]) {
+export class BookingDto extends PickType(BookingType, ['passType']) {
   @IsNotEmpty()
   @IsEnum($Enums.PassType)
   passType: $Enums.PassType;
 
   @IsNotEmpty()
   @IsValidStartDate()
-  startDate: Date;
+  startDate: string;
 
   @IsNotEmpty()
   @IsValidVisitTime()

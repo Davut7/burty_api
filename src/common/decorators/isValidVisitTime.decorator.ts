@@ -11,15 +11,32 @@ export class IsValidVisitTimeConstraint
   implements ValidatorConstraintInterface
 {
   validate(visitTime: any, args: ValidationArguments) {
-    const timeRegex = /^\d{2}-\d{2}$/;
+    const timeRegex = /^\d{2}:(00|30)-\d{2}:(00|30)$/;
 
     if (typeof visitTime !== 'string' || !timeRegex.test(visitTime)) {
       return false;
     }
 
-    const [startHour, endHour] = visitTime.split('-').map(Number);
+    const [startTime, endTime] = visitTime.split('-');
 
-    if (startHour >= endHour) {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+
+    if (
+      startHour > endHour ||
+      (startHour === endHour && startMinute >= endMinute)
+    ) {
+      return false;
+    }
+
+    if (
+      startHour < 0 ||
+      startHour > 23 ||
+      endHour < 0 ||
+      endHour > 23 ||
+      (startMinute !== 0 && startMinute !== 30) ||
+      (endMinute !== 0 && endMinute !== 30)
+    ) {
       return false;
     }
 
@@ -27,7 +44,7 @@ export class IsValidVisitTimeConstraint
   }
 
   defaultMessage(args: ValidationArguments) {
-    return 'visitTime must be in hh-hh format, and the first hh must be less than the second hh';
+    return 'visitTime must be in hh:mm-hh:mm format with only 00 or 30 minutes, and the start time must be less than the end time within the 00:00 to 23:30 range';
   }
 }
 

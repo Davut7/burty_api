@@ -6,5 +6,5 @@ export class UserForgotPasswordVerificationResponse extends PickType(
   ['message'] as const,
 ) {
   @ApiProperty({ description: 'Link to reset password' })
-  link: string;
+  link!: string;
 }

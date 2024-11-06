@@ -16,8 +16,9 @@ export class ImageTransformer implements PipeTransform<Express.Multer.File> {
 
   async transform(file: Express.Multer.File): Promise<ITransformedFile> {
     let transformedFile: ITransformedFile;
-    if (!file.path || !file.destination)
+    if (!file.path || !file.destination) {
       throw new BadRequestException('Image not provided');
+    }
     try {
       const uploadStream = createReadStream(file.path);
 

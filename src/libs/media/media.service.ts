@@ -17,7 +17,7 @@ export class MediaService {
     entityId: string,
     entityColumn: string,
   ) {
-    const mediaIds = [];
+    const mediaIds: string[] = [];
 
     for (const file of files) {
       const mediaData: any = {

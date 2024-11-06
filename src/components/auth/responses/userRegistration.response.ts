@@ -8,5 +8,5 @@ export class UserRegistrationResponse extends PickType(SuccessResponse, [
 ] as const) {
   @ApiProperty({ type: UsersAuthType })
   @Type(() => UsersAuthType)
-  user: UsersAuthType;
+  user!: UsersAuthType;
 }

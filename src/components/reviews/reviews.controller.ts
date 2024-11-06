@@ -7,22 +7,19 @@ import {
   HttpCode,
   HttpStatus,
   Patch,
+  Get,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/createReview.dto';
 import { UpdateReviewDto } from './dto/updateReview.dto';
 import { UserTokenDto } from '../token/dto/token.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { USER } from 'src/common/decorators/isUser.decorator';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreateReviewOperation } from './decorators/createReviewOperation.decorator';
 import { UpdateReviewOperation } from './decorators/updateReviewOperation.decorator';
 import { DeleteReviewOperation } from './decorators/deleteReviewOperation.decorator';
+import { GetReviewsBySpaceIdOperation } from './decorators/getReviewsBySpaceIdOperation.decorator';
 
 @ApiTags('reviews')
 @ApiBearerAuth()
@@ -59,6 +56,12 @@ export class ReviewsController {
       updateReviewDto,
       currentUser,
     );
+  }
+
+  @GetReviewsBySpaceIdOperation()
+  @Get(':spaceId')
+  async getReviewsBySpaceId(@Param('spaceId') spaceId: string) {
+    return await this.reviewsService.getReviewsBySpaceId(spaceId);
   }
 
   @DeleteReviewOperation()

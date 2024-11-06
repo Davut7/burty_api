@@ -6,10 +6,14 @@ model Media {
     mimeType     String                @map("mime_type")
     originalName String                @map("original_name")
     userId       String?               @unique @map("user_id") @db.Uuid
+    spaceId      String?      @unique @map("space_id") @db.Uuid
+    qrCodeId     String? @map("qr_code_id") @unique @db.Uuid
     mediaType     MediaType            @map("media_type")
     createdAt    DateTime?             @default(now()) @map("created_at")
     updatedAt    DateTime?             @updatedAt @map("updated_at")
     user Users? @relation(fields: [userId], references: [id], onDelete: Cascade)
+    space Spaces? @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+    qrCode QrCodes? @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
 
     @@map("medias")
 }

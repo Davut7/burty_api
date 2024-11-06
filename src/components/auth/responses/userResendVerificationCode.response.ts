@@ -9,5 +9,5 @@ export class UserResendVerificationCodeResponse extends PickType(
 ) {
   @ApiProperty({ type: UsersAuthType })
   @Type(() => UsersAuthType)
-  user: UsersAuthType;
+  user!: UsersAuthType;
 }

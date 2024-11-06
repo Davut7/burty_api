@@ -23,6 +23,13 @@ import { SpaceCommonModule } from './components/common/spaceCommon/spaceCommon.m
 import { CategoryCommonModule } from './components/common/categoryCommon/categoryCommon.module';
 import { ReviewsModule } from './components/reviews/reviews.module';
 import { BookingModule } from './components/booking/booking.module';
+import { MentorModule } from './components/mentor/mentor.module';
+import { CommentsModule } from './components/comments/comments.module';
+import { ReviewsCommonModule } from './components/common/reviewsCommon/reviewsCommon.module';
+import { CommentCommonModule } from './components/common/commentCommon/commentCommon.module';
+import { PaymentsModule } from './components/payments/payments.module';
+import { BookingCommonModule } from './components/common/bookingCommon/bookingCommon.module';
+import { TasksModule } from './libs/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -58,6 +65,13 @@ import { BookingModule } from './components/booking/booking.module';
     SpaceCommonModule,
     ReviewsModule,
     BookingModule,
+    MentorModule,
+    CommentsModule,
+    ReviewsCommonModule,
+    CommentCommonModule,
+    PaymentsModule,
+    BookingCommonModule,
+    TasksModule,
   ],
   providers: [
     {

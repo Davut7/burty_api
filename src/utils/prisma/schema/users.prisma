@@ -16,6 +16,7 @@ model Users {
     comments Comments[]
     reviews Reviews[]
     bookings Bookings[]
+    qrCodes QrCodes[]
 
      @@map("users")
 }

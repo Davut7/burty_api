@@ -5,5 +5,5 @@ export class UserForgotPasswordResponse extends PickType(SuccessResponse, [
   'message',
 ] as const) {
   @ApiProperty({ description: 'User id' })
-  id: string;
+  id!: string;
 }

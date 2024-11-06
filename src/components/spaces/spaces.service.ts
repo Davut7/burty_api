@@ -53,6 +53,7 @@ export class SpacesService {
     const spaces = await this.prismaService.spaces.findMany({
       skip: (page - 1) * take,
       take,
+      include: { medias: true },
     });
 
     return spaces
@@ -86,6 +87,7 @@ export class SpacesService {
       take,
       skip: (page - 1) * take,
       include: {
+        medias: true,
         reviews: true,
       },
     });
@@ -158,6 +160,7 @@ export class SpacesService {
       where,
       take,
       skip: (page - 1) * take,
+      include: { medias: true },
     });
 
     return spaces
@@ -187,6 +190,16 @@ export class SpacesService {
     const { latitude, longitude } = query;
     const space = await this.prismaService.spaces.findUnique({
       where: { id: spaceId },
+      include: {
+        reviews: {
+          include: {
+            user: {
+              include: { media: true },
+            },
+          },
+        },
+        medias: true,
+      },
     });
 
     if (!space) {

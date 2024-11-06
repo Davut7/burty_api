@@ -1,7 +1,7 @@
 model Comments {
     id String @id @default(uuid()) @db.Uuid
     comment String
-    createdAt String @map("created_at")
+    createdAt DateTime @map("created_at") @default(now())
     userId String @map("user_id") @db.Uuid
     bookingId String @map("booking_id") @db.Uuid
     user Users @relation(fields: [userId], references: [id])

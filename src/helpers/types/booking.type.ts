@@ -65,8 +65,14 @@ export class BookingType implements Bookings {
   createdAt: Date;
 
   @ApiProperty({
-    description: 'The time of the visit for the booking',
+    description: 'The start time of the visit for the booking',
     example: '15:30',
   })
-  visitTime: string;
+  startTime: string;
+
+  @ApiProperty({
+    description: 'The end time of the visit for the booking',
+    example: '15:30',
+  })
+  endTime;
 }

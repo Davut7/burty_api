@@ -54,4 +54,10 @@ export class MediaType implements Media {
 
   @Exclude()
   userId: string;
+
+  @Exclude()
+  spaceId: string;
+
+  @Exclude()
+  qrCodeId: string;
 }

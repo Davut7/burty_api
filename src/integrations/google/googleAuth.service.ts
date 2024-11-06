@@ -51,8 +51,13 @@ export class GoogleAuthService {
         );
       }
 
-      this.logger.log(`Получен пользователь от Google: ${user.email}`);
+      if (!user.given_name || !user.family_name || !user.email) {
+        throw new BadRequestException(
+          'Не удалось получить необходимые данные пользователя от Google',
+        );
+      }
 
+      this.logger.log(`Получен пользователь от Google: ${user.email}`);
       const userRegistrationDto: UserSocialRegistrationDto = {
         firstName: user.given_name,
         lastName: user.family_name,

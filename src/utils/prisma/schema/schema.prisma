@@ -35,6 +35,7 @@ enum PassType {
   duo
   squad
   team
+  full
 }
 
 enum BookingStatus {

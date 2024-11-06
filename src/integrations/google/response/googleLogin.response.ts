@@ -8,5 +8,5 @@ export class GoogleLoginResponse extends PickType(SuccessResponse, [
 ]) {
   @ApiProperty({ type: UsersAuthType })
   @Type(() => UsersAuthType)
-  user: UsersAuthType;
+  user!: UsersAuthType;
 }

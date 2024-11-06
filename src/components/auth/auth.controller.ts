@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -97,6 +98,9 @@ export class AuthController {
     const { headers } = req;
 
     const authorizationHeader = headers.authorization;
+    if (!authorizationHeader) {
+      throw new UnauthorizedException('User unauthorized!');
+    }
 
     const accessToken = authorizationHeader.split(' ')[1];
 

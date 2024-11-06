@@ -1,7 +1,37 @@
-import { PrismaClient } from '@prisma/client';
+import { MediaType, PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
+import * as path from 'path';
+import { PrismaService } from '../../utils/prisma/prisma.service';
+import { MediaService } from '../../libs/media/media.service';
+import { MinioService } from '../../libs/minio/minio.service';
+import { Readable } from 'stream';
+import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
 
 const prisma = new PrismaClient();
+const configService = new ConfigService();
+const minioService = new MinioService(configService);
+const prismaService = new PrismaService();
+const mediaService = new MediaService(minioService, prismaService);
+const imageTransformer = new ImageTransformer(minioService);
+
+export interface ITransformedFile {
+  fileName: string;
+  filePath: string;
+  mimeType: string;
+  size: string;
+  originalName: string;
+  mediaType: MediaType;
+}
+
+const imagePaths = [
+  './public/football.webp',
+  './public/basketball.webp',
+  './public/tennis.webp',
+  './public/volleyball.webp',
+  './public/volleyball.webp',
+];
 
 export async function seedCategoriesAndSpaces() {
   await prisma.spaces.deleteMany();
@@ -27,7 +57,13 @@ async function createCategoriesWithSpaces() {
     });
 
     for (let i = 0; i < 5; i++) {
-      await prisma.spaces.create({
+      const image = await createMulterFile(imagePaths[i]);
+      if (!image) {
+        return;
+      }
+
+      const transformedFile = await imageTransformer.transform(image);
+      const space = await prisma.spaces.create({
         data: {
           name: faker.company.name(),
           address: faker.location.streetAddress(),
@@ -50,6 +86,7 @@ async function createCategoriesWithSpaces() {
           maxPlayers: faker.number.float({ min: 6, max: 20 }),
         },
       });
+      await mediaService.createFileMedia(transformedFile, space.id, 'spaceId');
     }
   }
 }
@@ -64,3 +101,32 @@ seedCategoriesAndSpaces()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+type MulterFile = Express.Multer.File;
+
+async function createMulterFile(filePath: string): Promise<MulterFile | null> {
+  try {
+    const fileBuffer = await fs.promises.readFile(filePath);
+    const stats = await fs.promises.stat(filePath);
+
+    const readable = new Readable();
+
+    const file: MulterFile = {
+      fieldname: 'file',
+      originalname: path.basename(filePath),
+      encoding: '7bit',
+      mimetype: 'image/png',
+      buffer: fileBuffer,
+      size: stats.size,
+      destination: './public',
+      filename: path.basename(filePath),
+      path: filePath,
+      stream: readable,
+    };
+
+    return file;
+  } catch (err) {
+    console.error('Error reading file:', err);
+    return null;
+  }
+}

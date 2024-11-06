@@ -33,7 +33,12 @@ export class RedisRepository implements OnModuleDestroy {
   keys(pattern: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
       this.redisClient.keys(pattern, (err, keys) => {
-        if (err) return reject(err);
+        if (err) {
+          return reject(err);
+        }
+        if (!keys) {
+          return reject(err);
+        }
         resolve(keys);
       });
     });

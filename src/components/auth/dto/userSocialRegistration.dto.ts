@@ -6,4 +6,5 @@ export class UserSocialRegistrationDto extends PickType(UsersDto, [
   'firstName',
   'lastName',
   'provider',
-]) {}
+]) {
+}

@@ -16,6 +16,7 @@ model Spaces {
   category    Category? @relation(fields: [categoryId], references: [id])
   reviews     Reviews[]
   bookings Bookings[]
+  medias Media[]
 
   @@map("spaces")
 }

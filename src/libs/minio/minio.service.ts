@@ -11,11 +11,11 @@ export class MinioService implements OnModuleInit {
 
   constructor(private configService: ConfigService) {
     this.minioClient = new Minio.Client({
-      endPoint: this.configService.getOrThrow('MINIO_ENDPOINT'),
-      port: +this.configService.getOrThrow<number>('MINIO_PORT'),
-      useSSL: false,
-      accessKey: this.configService.getOrThrow('MINIO_ROOT_USER'),
-      secretKey: this.configService.getOrThrow('MINIO_ROOT_PASSWORD'),
+      endPoint: process.env.MINIO_HOST || 'localhost',
+      port: Number(process.env.MINIO_PORT) || 9000,
+      useSSL: process.env.MINIO_USE_SSL === 'true',
+      accessKey: process.env.MINIO_ROOT_USER,
+      secretKey: process.env.MINIO_ROOT_PASSWORD,
     });
 
     this.bucketName = this.configService.getOrThrow('MINIO_BUCKET_NAME');
@@ -23,6 +23,9 @@ export class MinioService implements OnModuleInit {
 
   async onModuleInit() {
     try {
+      this.logger.log(
+        `Connecting to MinIO at ${this.configService.getOrThrow('MINIO_ENDPOINT')}:${this.configService.getOrThrow('MINIO_PORT')}`,
+      );
       await this.createBucketIfNotExists();
     } catch (error: any) {
       this.logger.error(`Failed to create bucket on startup: ${error.message}`);
@@ -100,13 +103,16 @@ export class MinioService implements OnModuleInit {
 
     this.logger.log(`Retrieved file URL: ${url}`);
 
-    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV === 'development') {
       return url;
     }
-    return url.replace(
-      this.configService.getOrThrow<'string'>('MINIO_ENDPOINT'),
-      this.configService.getOrThrow<'string'>('MINIO_HOST'),
-    );
+
+    const endpoint = this.configService.getOrThrow<string>('MINIO_ENDPOINT');
+    console.log('🚀 ~ MinioService ~ getFileUrl ~ endpoint:', endpoint);
+    const host = this.configService.getOrThrow<string>('MINIO_HOST');
+    console.log('🚀 ~ MinioService ~ getFileUrl ~ host:', host);
+
+    return url.replace(endpoint, host);
   }
 
   async deleteFile(fileName: string) {
