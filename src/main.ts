@@ -1,26 +1,26 @@
-import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
-import 'reflect-metadata';
-import * as compression from 'compression';
-import * as Sentry from '@sentry/node';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { nodeProfilingIntegration } from '@sentry/profiling-node';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
-import { ConfigService } from '@nestjs/config';
-import {
-  ClassSerializerInterceptor,
-  LogLevel,
-  ValidationPipe,
-} from '@nestjs/common';
 import fastifyCookie from '@fastify/cookie';
 import fastifyCors from '@fastify/cors';
 import fastifyCsrfProtection from '@fastify/csrf-protection';
 import fastifyHelmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
+import {
+  ClassSerializerInterceptor,
+  LogLevel,
+  ValidationPipe,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory, Reflector } from '@nestjs/core';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as Sentry from '@sentry/node';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
+import * as compression from 'compression';
+import 'reflect-metadata';
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -76,7 +76,7 @@ async function bootstrap() {
     useGlobalPrefix: true,
   };
 
-  if (configService.get('ENVIRONMENT') !== 'prod') {
+  if (configService.get('ENVIRONMENT') !== 'production') {
     SwaggerModule.setup('api/docs', app, document, options);
   }
 
