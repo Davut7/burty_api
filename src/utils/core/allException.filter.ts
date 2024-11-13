@@ -4,9 +4,9 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { LoggerService } from '../../libs/logger/logger.service';
 import { CustomHttpExceptionResponse } from './httpExceptionResponse.interface';
 
 interface CustomRequest extends Request {
@@ -16,7 +16,7 @@ interface CustomRequest extends Request {
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger('HTTP-exception');
+  constructor(private logger: LoggerService) {}
 
   async catch(exception: any, host: ArgumentsHost): Promise<void> {
     const ctx = host.switchToHttp();
@@ -44,7 +44,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     const errorResponse = this.getErrorResponse(status, errorMessage, request);
-    this.getErrorLog(errorResponse, request);
+    const errorStack = exception instanceof Error ? exception.stack : '';
+
+    this.logError(errorResponse, request, errorStack);
 
     response.status(status).send(errorResponse);
   }
@@ -61,25 +63,33 @@ export class AllExceptionsFilter implements ExceptionFilter {
     timeStamp: new Date(),
   });
 
-  private getErrorLog = (
+  private logError = (
     errorResponse: CustomHttpExceptionResponse,
     request: CustomRequest,
+    errorStack: string,
   ) => {
     const { statusCode, message } = errorResponse;
     const { method, originalUrl, hostname } = request;
 
-    let host;
-    if (request.headers['x-real-ip'] === hostname) {
-      host = 'localhost';
+    let host: string;
+    if (Array.isArray(request.headers['x-real-ip'])) {
+      host = request.headers['x-real-ip'][0];
     } else {
-      host = request.headers['x-real-ip'] || '';
+      host = request.headers['x-real-ip'] || 'localhost';
     }
-    this.logger.error(message, [
+
+    const logDetails = {
       host,
-      originalUrl,
       statusCode,
       method,
-      JSON.stringify(request.currentUser ?? 'Not signed in', null, 2),
-    ]);
+      url: originalUrl,
+      user: JSON.stringify(request.currentUser ?? 'Not signed in', null, 2),
+      errorStack,
+    };
+
+    this.logger.error(
+      `Ошибка: ${message} | Статус: ${statusCode} | Метод: ${method} | URL: ${originalUrl}`,
+      JSON.stringify(logDetails),
+    );
   };
 }
