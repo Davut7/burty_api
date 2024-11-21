@@ -25,6 +25,7 @@ import { ReviewsModule } from './components/reviews/reviews.module';
 import { SpacesModule } from './components/spaces/spaces.module';
 import { TokenModule } from './components/token/token.module';
 import { UsersModule } from './components/users/users.module';
+import { LoggerModule } from './libs/logger/logger.module';
 import { MediaModule } from './libs/media/media.module';
 import { MinioModule } from './libs/minio/minio.module';
 import { RedisModule } from './libs/redis/redis.module';
@@ -32,7 +33,6 @@ import { TasksModule } from './libs/tasks/tasks.module';
 import { AllExceptionsFilter } from './utils/core/allException.filter';
 import { HealthModule } from './utils/health/health.module';
 import { PrismaModule } from './utils/prisma/prisma.module';
-import { LoggerModule } from './libs/logger/logger.module';
 
 @Module({
   imports: [
@@ -49,7 +49,6 @@ import { LoggerModule } from './libs/logger/logger.module';
         ttl: 60,
         host: configService.getOrThrow<string>('REDIS_HOST'),
         port: configService.getOrThrow<number>('REDIS_PORT'),
-        no_ready_check: true,
       }),
     }),
     MongooseModule.forRootAsync({
