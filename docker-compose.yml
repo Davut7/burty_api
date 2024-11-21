@@ -19,8 +19,8 @@ services:
       REDIS_PORT: ${REDIS_PORT}
     command: >
       sh -c "
-      npm run prisma:migrate:deploy:${ENVIRONMENT} &&
-      npm run prisma:generate:${ENVIRONMENT} &&
+      npm run prisma:migrate:deploy &&
+      npm run prisma:generate:dev &&
       node --max-old-space-size=2048 node_modules/.bin/nest start
       "
     mem_limit: 3g
