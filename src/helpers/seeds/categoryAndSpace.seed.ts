@@ -1,13 +1,13 @@
-import { MediaType, PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { ConfigService } from '@nestjs/config';
+import { MediaType, PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PrismaService } from '../../utils/prisma/prisma.service';
+import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
+import { Readable } from 'stream';
 import { MediaService } from '../../libs/media/media.service';
 import { MinioService } from '../../libs/minio/minio.service';
-import { Readable } from 'stream';
-import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
+import { PrismaService } from '../../utils/prisma/prisma.service';
 
 const prisma = new PrismaClient();
 const configService = new ConfigService();
@@ -30,7 +30,7 @@ const imagePaths = [
   './public/basketball.webp',
   './public/tennis.webp',
   './public/volleyball.webp',
-  './public/volleyball.webp',
+  './public/badminton.webp',
 ];
 
 export async function seedCategoriesAndSpaces() {

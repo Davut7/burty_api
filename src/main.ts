@@ -3,11 +3,7 @@ import fastifyCors from '@fastify/cors';
 import fastifyCsrfProtection from '@fastify/csrf-protection';
 import fastifyHelmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
-import {
-  ClassSerializerInterceptor,
-  LogLevel,
-  ValidationPipe,
-} from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import {
@@ -21,19 +17,26 @@ import * as compression from 'compression';
 import 'reflect-metadata';
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
 import { AppModule } from './app.module';
+import { LoggerService } from './libs/logger/logger.service';
+
+declare const module: any;
 
 async function bootstrap() {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const logLevels: LogLevel[] = isProduction
-    ? ['error', 'warn', 'log']
-    : ['error', 'warn', 'log', 'debug', 'verbose'];
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
     {
-      logger: logLevels,
+      bufferLogs: true,
     },
   );
+
+  const logger = app.get(LoggerService);
+  app.useLogger(logger);
+
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
 
   const configService = app.get(ConfigService);
   const port = configService.getOrThrow<number>('PORT');
