@@ -79,7 +79,7 @@ async function bootstrap() {
     useGlobalPrefix: true,
   };
 
-  if (configService.get('ENVIRONMENT') !== 'production') {
+  if (configService.get('ENVIRONMENT') !== 'prod') {
     SwaggerModule.setup('api/docs', app, document, options);
   }
 

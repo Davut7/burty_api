@@ -11,12 +11,9 @@ services:
         condition: service_healthy
       burty_redis:
         condition: service_healthy
+      burty_mongodb:
+        condition: service_healthy
     restart: unless-stopped
-    environment:
-      NODE_ENV: ${ENVIRONMENT}
-      DATABASE_URL: ${DATABASE_URL}
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
     command: >
       sh -c "
       npm run prisma:migrate:deploy &&
@@ -25,8 +22,18 @@ services:
       "
     mem_limit: 3g
     mem_reservation: 1.5g
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f -H "Authorization: Bearer ${HEALTH_CHECK_TOKEN}" http://localhost:5005/api/health || exit 1',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     networks:
-      - my_network
+      - burty_network
 
   burty_postgres:
     image: postgres:latest
@@ -42,7 +49,7 @@ services:
       - '5432:5432'
     restart: unless-stopped
     networks:
-      - my_network
+      - burty_network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
       interval: 10s
@@ -65,7 +72,17 @@ services:
       - minio_data:/data
     restart: unless-stopped
     networks:
-      - my_network
+      - burty_network
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:9000/minio/health/live || exit 1',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   burty_redis:
     image: redis:latest
@@ -76,18 +93,41 @@ services:
       - redis_data:/data
     restart: unless-stopped
     networks:
-      - my_network
+      - burty_network
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
 
+  burty_mongodb:
+    image: mongo:latest
+    container_name: burty_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    ports:
+      - '27017:27017'
+    expose:
+      - '27017'
+    volumes:
+      - mongodb_data:/data
+    networks:
+      - burty_network
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', 'db.adminCommand("ping").ok']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
 volumes:
   pg_data:
   minio_data:
   redis_data:
+  mongodb_data:
 
 networks:
-  my_network:
-    driver: bridge
+  burty_network:
+    external: true

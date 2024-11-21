@@ -14,7 +14,7 @@ export class LoggerService {
         const environment = configService.get<string>('NODE_ENV');
         let logLevel = 'debug';
 
-        if (environment === 'production') {
+        if (environment === 'prod') {
             logLevel = 'warn';
         } else if (environment === 'test') {
             logLevel = 'error';
@@ -39,7 +39,7 @@ export class LoggerService {
             ],
         });
 
-        if (environment === 'production') {
+        if (environment === 'prod') {
             this.logger.add(
                 new DailyRotateFile({
                     dirname: this.logsDir,

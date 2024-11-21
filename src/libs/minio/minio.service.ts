@@ -103,7 +103,7 @@ export class MinioService implements OnModuleInit {
 
     this.logger.log(`Retrieved file URL: ${url}`);
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'dev') {
       return url;
     }
 

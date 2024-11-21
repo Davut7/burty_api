@@ -14,10 +14,10 @@ export class MailsService {
   async sendEmailVerificationLink(email: string, link: string) {
     this.logger.log(`Sending email verification link to: ${email}`);
     if (
-      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'dev' ||
       process.env.NODE_ENV === 'test'
     ) {
-      this.logger.log('In development mode, skipping email sending.');
+      this.logger.log('In dev mode, skipping email sending.');
       return { message: 'Mail send successfully!' };
     }
     await this.mailerService.sendMail({
