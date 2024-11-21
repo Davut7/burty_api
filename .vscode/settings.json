@@ -10,5 +10,8 @@
       "database": "postgres",
       "username": "postgres"
     }
-  ]
+  ],
+  "yaml.schemas": {
+    "https://www.artillery.io/schema.json": []
+  }
 }

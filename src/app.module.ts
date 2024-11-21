@@ -32,6 +32,7 @@ import { TasksModule } from './libs/tasks/tasks.module';
 import { AllExceptionsFilter } from './utils/core/allException.filter';
 import { HealthModule } from './utils/health/health.module';
 import { PrismaModule } from './utils/prisma/prisma.module';
+import { LoggerModule } from './libs/logger/logger.module';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { PrismaModule } from './utils/prisma/prisma.module';
     PaymentsModule,
     BookingCommonModule,
     TasksModule,
+    LoggerModule,
   ],
   providers: [
     {
