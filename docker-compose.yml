@@ -122,6 +122,39 @@ services:
       retries: 5
       start_period: 60s
 
+  directus:
+    image: directus/directus:11.1.1
+    container_name: burty_directus
+    ports:
+      - '8055:8055'
+    volumes:
+      - ./uploads:/directus/uploads
+      - ./extensions:/directus/extensions
+    environment:
+      HOST: '0.0.0.0'
+      PORT: 8055
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+      DB_CLIENT: 'pg'
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+      ADMIN_NAME: ${DIRECTUS_ADMIN_NAME}
+      PUBLIC_URL: https://burty-api.ru/directus
+      WEBSOCKETS_ENABLED: true
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - burty_network
+
 volumes:
   pg_data:
   minio_data:

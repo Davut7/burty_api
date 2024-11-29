@@ -39,7 +39,7 @@ import { PrismaModule } from './utils/prisma/prisma.module';
   imports: [
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,
-      validate,
+      // validate,
       isGlobal: true,
       cache: true,
     }),
