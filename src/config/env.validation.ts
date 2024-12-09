@@ -49,12 +49,12 @@ const configSchema = Joi.object({
   STRIPE_SECRET_KEY: Joi.string().required(),
 
   //DIRECTUS
-  DIRECTUS_KEY: Joi.string().required(),
-  DIRECTUS_SECRET: Joi.string().required(),
-  DIRECTUS_ADMIN_EMAIL: Joi.string().required(),
-  DIRECTUS_ADMIN_PASSWORD: Joi.string().required(),
-  DIRECTUS_ADMIN_NAME: Joi.string().required(),
-  DIRECTUS_URL: Joi.string().required(),
+  DIRECTUS_KEY: Joi.string().optional(),
+  DIRECTUS_SECRET: Joi.string().optional(),
+  DIRECTUS_ADMIN_EMAIL: Joi.string().optional(),
+  DIRECTUS_ADMIN_PASSWORD: Joi.string().optional(),
+  DIRECTUS_ADMIN_NAME: Joi.string().optional(),
+  DIRECTUS_URL: Joi.string().optional(),
 }).unknown(true);
 
 export function validate(config: Record<string, unknown>) {

@@ -213,26 +213,10 @@ export class SpacesService {
       space.longitude,
     );
 
-    // const facilities = await this.getFacilitiesBySpace(spaceId);
-
     return {
       ...space,
-      // ...facilities,
       distanceInKm: kilometers,
       distanceInM: meters,
     };
-  }
-
-  async getFacilitiesBySpace(spaceId: string) {
-    const facilities = await this.prismaService.facilities.findMany({
-      where: { spaces: { some: { id: spaceId } } },
-      include: { media: true },
-    });
-
-    return facilities.map((facility) => ({
-      id: facility.id,
-      name: facility.name,
-      icon: facility.media?.filePath || null,
-    }));
   }
 }
