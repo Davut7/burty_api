@@ -47,6 +47,14 @@ const configSchema = Joi.object({
   REDIS_ACCESS_TOKEN_TIME: Joi.string().required(),
   HEALTH_CHECK_TOKEN: Joi.string().required(),
   STRIPE_SECRET_KEY: Joi.string().required(),
+
+  //DIRECTUS
+  DIRECTUS_KEY: Joi.string().required(),
+  DIRECTUS_SECRET: Joi.string().required(),
+  DIRECTUS_ADMIN_EMAIL: Joi.string().required(),
+  DIRECTUS_ADMIN_PASSWORD: Joi.string().required(),
+  DIRECTUS_ADMIN_NAME: Joi.string().required(),
+  DIRECTUS_URL: Joi.string().required(),
 }).unknown(true);
 
 export function validate(config: Record<string, unknown>) {
