@@ -1,23 +1,25 @@
 import {
-  Controller,
-  Post,
   Body,
-  Param,
+  Controller,
   Get,
-  Query,
+  Param,
   Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
-import { BookingService } from './booking.service';
-import { CreateBookingDto } from './dto/createBooking.dto';
-import { GetBookingsQuery } from './query/getBookings.query';
-import { UserTokenDto } from '../token/dto/token.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateBookingOperation } from './decorator/createBookingOperation.decorator';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { USER } from 'src/common/decorators/isUser.decorator';
+import { UserTokenDto } from '../token/dto/token.dto';
+import { BookingService } from './booking.service';
 import { CancelBookingOperation } from './decorator/cancelBookingOperation.decorator';
+import { CreateBookingOperation } from './decorator/createBookingOperation.decorator';
 import { GetBookingsOperation } from './decorator/getBookingsOperation.decorator';
 import { GetOneBookingOperation } from './decorator/getOneBookingOperation.decorator';
-import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CreateBookingDto } from './dto/createBooking.dto';
+import { GetBookingsQuery } from './query/getBookings.query';
 
+@USER()
 @ApiTags('Bookings')
 @Controller('bookings')
 export class BookingController {

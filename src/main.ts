@@ -11,8 +11,6 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as Sentry from '@sentry/node';
-import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import * as compression from 'compression';
 import 'reflect-metadata';
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
@@ -40,22 +38,6 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.getOrThrow<number>('PORT');
-  Sentry.init({
-    dsn: configService.getOrThrow<'string'>('SENTRY_DNS'),
-    integrations: [
-      new Sentry.Integrations.Http({ tracing: true }),
-
-      nodeProfilingIntegration(),
-    ],
-
-    tracesSampleRate: 1.0,
-
-    profilesSampleRate: 1.0,
-  });
-
-  app.use(Sentry.Handlers.requestHandler());
-
-  app.use(Sentry.Handlers.tracingHandler());
 
   const config = new DocumentBuilder()
     .setTitle('Burty server')
@@ -109,8 +91,6 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0', () => {
     console.log(`Your server is listening on port ${port}`);
   });
-
-  app.use(Sentry.Handlers.tracingHandler());
 }
 
 bootstrap();

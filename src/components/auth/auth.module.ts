@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UserCommonModule } from '../userCommon/userCommon.module';
 import { TokenModule } from '../token/token.module';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { MailsModule } from 'src/components/mails/mails.module';
 import { RedisModule } from 'src/libs/redis/redis.module';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { ConfigService } from '@nestjs/config';
+import { UserCommonModule } from '../common/userCommon/userCommon.module';
 
 @Module({
   imports: [

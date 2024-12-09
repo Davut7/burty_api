@@ -23,9 +23,11 @@ import { MentorModule } from './components/mentor/mentor.module';
 import { PaymentsModule } from './components/payments/payments.module';
 import { ReviewsModule } from './components/reviews/reviews.module';
 import { SpacesModule } from './components/spaces/spaces.module';
+import { StripeModule } from './components/stripe/stripe.module';
 import { TokenModule } from './components/token/token.module';
 import { UsersModule } from './components/users/users.module';
 import { validate } from './config/env.validation';
+import { GoogleAuthModule } from './integrations/google/googleAuth.module';
 import { LoggerModule } from './libs/logger/logger.module';
 import { MediaModule } from './libs/media/media.module';
 import { MinioModule } from './libs/minio/minio.module';
@@ -39,7 +41,7 @@ import { PrismaModule } from './utils/prisma/prisma.module';
   imports: [
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,
-      // validate,
+      validate,
       isGlobal: true,
       cache: true,
     }),
@@ -91,6 +93,8 @@ import { PrismaModule } from './utils/prisma/prisma.module';
     BookingCommonModule,
     TasksModule,
     LoggerModule,
+    GoogleAuthModule,
+    StripeModule,
   ],
   providers: [
     {

@@ -32,24 +32,34 @@ const configSchema = Joi.object({
   JWT_ACCESS_TIME: Joi.string().required(),
   JWT_REFRESH_TIME: Joi.string().required(),
 
+  MONGO_USERNAME: Joi.string().required(),
+  MONGO_PASSWORD: Joi.string().required(),
+  MONGO_DATABASE: Joi.string().required(),
+  MONGO_HOST: Joi.string().required(),
+  MONGODB_URI: Joi.string().required(),
+
   //GOOGLE
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
   GOOGLE_REDIRECT_URI: Joi.string().required(),
 
-  //FACEBOOK
-  FACEBOOK_CLIENT_ID: Joi.string().required(),
-  FACEBOOK_CLIENT_SECRET: Joi.string().required(),
-  FACEBOOK_REDIRECT_URI: Joi.string().required(),
-
   //UTILS
-  SENTRY_DNS: Joi.string().required(),
   REDIS_ACCESS_TOKEN_TIME: Joi.string().required(),
   HEALTH_CHECK_TOKEN: Joi.string().required(),
-}).unknown(false);
+  STRIPE_SECRET_KEY: Joi.string().required(),
+}).unknown(true);
 
 export function validate(config: Record<string, unknown>) {
-  const { error, value } = configSchema.validate(config, { abortEarly: false });
+  const validConfig = Object.keys(config)
+    .filter((key) => configSchema.describe().keys[key])
+    .reduce((acc, key) => {
+      acc[key] = config[key];
+      return acc;
+    }, {});
+
+  const { error, value } = configSchema.validate(validConfig, {
+    abortEarly: false,
+  });
 
   if (error) {
     throw new Error(`Config validation error: ${error.message}`);

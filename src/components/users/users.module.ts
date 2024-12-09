@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
-import { UserCommonModule } from '../userCommon/userCommon.module';
-import { RedisModule } from 'src/libs/redis/redis.module';
 import { MediaModule } from 'src/libs/media/media.module';
+import { RedisModule } from 'src/libs/redis/redis.module';
+import { UserCommonModule } from '../common/userCommon/userCommon.module';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
 
 @Module({
   imports: [UserCommonModule, MediaModule, RedisModule],

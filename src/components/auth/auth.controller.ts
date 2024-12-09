@@ -12,36 +12,36 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import { UserRegistrationDto } from './dto/userRegistration.dto';
-import { UserLoginDto } from './dto/userLogin.dto';
-import { UserVerificationDto } from './dto/userVerification.dto';
-import { ResetPasswordDto } from './dto/resetPassword.dto';
-import { UserTokenDto } from '../token/dto/token.dto';
+import { FastifyRequest } from 'fastify';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { UserRegistrationResponse } from './responses/userRegistration.response';
-import { UserLoginResponse } from './responses/userLogin.response';
-import { UserResendVerificationCodeResponse } from './responses/userResendVerificationCode.response';
-import { UserForgotPasswordDto } from './dto/userForgotPassword.dto';
+import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
+import { RedisService } from 'src/libs/redis/redis.service';
+import { UserTokenDto } from '../token/dto/token.dto';
+import { AuthService } from './auth.service';
+import { ForgotPasswordOperation } from './decorators/forgotPasswordOperation.decorator';
+import { ResendVerificationCodeOperation } from './decorators/resendVerificationCodeOperation.decorator';
+import { ResetPasswordOperation } from './decorators/resetPasswordOperation.decorator';
+import { UserLoginOperation } from './decorators/userLoginOperation.decorator';
+import { UserLogoutOperation } from './decorators/userLogout.decorator';
+import { UserRefreshOperation } from './decorators/userRefreshOperation.decorator';
 import { UserRegistrationOperation } from './decorators/userRegistrationOperation.decorator';
 import { UserVerificationOperation } from './decorators/userVerificationOperation.decorator';
-import { ResendVerificationCodeOperation } from './decorators/resendVerificationCodeOperation.decorator';
-import { UserLoginOperation } from './decorators/userLoginOperation.decorator';
-import { UserRefreshOperation } from './decorators/userRefreshOperation.decorator';
-import { UserLogoutOperation } from './decorators/userLogout.decorator';
-import { ForgotPasswordOperation } from './decorators/forgotPasswordOperation.decorator';
-import { VerifyForgotPasswordOperation } from './decorators/verifyForgotPasswordOperation.decorator';
-import { ResetPasswordOperation } from './decorators/resetPasswordOperation.decorator';
 import { ValidateResetPassword } from './decorators/validateResetPasswordOperation.decorator';
-import { UserVerifyResponse } from './responses/userVerify.response';
-import { UserRefreshResponse } from './responses/userRefresh.response';
+import { VerifyForgotPasswordOperation } from './decorators/verifyForgotPasswordOperation.decorator';
+import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { UserForgotPasswordDto } from './dto/userForgotPassword.dto';
+import { UserLoginDto } from './dto/userLogin.dto';
+import { UserRefreshTokenDto } from './dto/userRefreshToken.dto';
+import { UserRegistrationDto } from './dto/userRegistration.dto';
+import { UserVerificationDto } from './dto/userVerification.dto';
 import { UserForgotPasswordResponse } from './responses/userForgotPassword.response';
 import { UserForgotPasswordVerificationResponse } from './responses/userForgotPasswordVerification.response';
+import { UserLoginResponse } from './responses/userLogin.response';
+import { UserRefreshResponse } from './responses/userRefresh.response';
+import { UserRegistrationResponse } from './responses/userRegistration.response';
+import { UserResendVerificationCodeResponse } from './responses/userResendVerificationCode.response';
+import { UserVerifyResponse } from './responses/userVerify.response';
 import { ValidateResetPasswordResponse } from './responses/validateResetPasswordLink.response';
-import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
-import { UserRefreshTokenDto } from './dto/userRefreshToken.dto';
-import { RedisService } from 'src/libs/redis/redis.service';
-import { FastifyRequest } from 'fastify';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -93,6 +93,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @UserLogoutOperation()
   @HttpCode(200)
   async logout(@Body() dto: UserRefreshTokenDto, @Req() req: FastifyRequest) {
     const { headers } = req;

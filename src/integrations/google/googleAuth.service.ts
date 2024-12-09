@@ -69,8 +69,8 @@ export class GoogleAuthService {
         userRegistrationDto,
       );
     } catch (error: any) {
-      this.logger.error('Ошибка входа через Google:', error.message);
-      throw new BadRequestException('Ошибка авторизации через Google');
+      console.log(`Ошибка входа через Google:${error.message}`, error.message);
+      throw new BadRequestException(`Ошибка авторизации через Google ${error}`);
     }
   }
 }

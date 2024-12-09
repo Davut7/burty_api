@@ -1,5 +1,5 @@
-import { Spaces } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { Spaces } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class SpacesType implements Spaces {

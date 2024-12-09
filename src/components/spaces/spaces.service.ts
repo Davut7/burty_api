@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { SpacesType } from 'src/helpers/types/spaces.type';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { GetNearbySpacesQuery } from './query/getNearbySpaces.query';
-import { GetSpacesByFilterQuery } from './query/getSpacesByFilter.query';
-import { SpacesType } from 'src/helpers/types/spaces.type';
 import { GetOneSpaceQuery } from './query/getOneSpace.query';
+import { GetSpacesByFilterQuery } from './query/getSpacesByFilter.query';
 import { GetSpacesResponse } from './responses/getSpaces.response';
 
 @Injectable()
@@ -213,10 +213,26 @@ export class SpacesService {
       space.longitude,
     );
 
+    // const facilities = await this.getFacilitiesBySpace(spaceId);
+
     return {
       ...space,
+      // ...facilities,
       distanceInKm: kilometers,
       distanceInM: meters,
     };
+  }
+
+  async getFacilitiesBySpace(spaceId: string) {
+    const facilities = await this.prismaService.facilities.findMany({
+      where: { spaces: { some: { id: spaceId } } },
+      include: { media: true },
+    });
+
+    return facilities.map((facility) => ({
+      id: facility.id,
+      name: facility.name,
+      icon: facility.media?.filePath || null,
+    }));
   }
 }

@@ -25,7 +25,6 @@ enum UserRole {
 enum AuthProviders {
   google
   email
-  facebook
 
   @@map("auth_providers")
 }

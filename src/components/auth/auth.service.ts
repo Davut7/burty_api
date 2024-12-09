@@ -6,32 +6,32 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { UserRegistrationDto } from './dto/userRegistration.dto';
-import { generateHash, verifyHash } from 'src/helpers/providers/generateHash';
-import { generateVerificationCodeAndExpiry } from 'src/helpers/providers/generateVerificationCode';
-import { UserLoginDto } from './dto/userLogin.dto';
-import { UserCommonService } from '../userCommon/userCommon.service';
-import { TokenService } from '../token/token.service';
-import { UserTokenDto } from '../token/dto/token.dto';
-import { UserVerificationDto } from './dto/userVerification.dto';
 import { ConfigService } from '@nestjs/config';
-import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { AuthProviders, Users } from '@prisma/client';
+import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
+import { generateHash, verifyHash } from 'src/helpers/providers/generateHash';
 import { generateResetPasswordLink } from 'src/helpers/providers/generateResetPasswordLink';
-import { UserRegistrationResponse } from './responses/userRegistration.response';
+import { generateVerificationCodeAndExpiry } from 'src/helpers/providers/generateVerificationCode';
+import { UsersType } from 'src/helpers/types/users/users.type';
+import { RedisService } from 'src/libs/redis/redis.service';
+import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { UserCommonService } from '../common/userCommon/userCommon.service';
+import { UserTokenDto } from '../token/dto/token.dto';
+import { TokenService } from '../token/token.service';
+import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { UserForgotPasswordDto } from './dto/userForgotPassword.dto';
-import { UserVerifyResponse } from './responses/userVerify.response';
-import { UserResendVerificationCodeResponse } from './responses/userResendVerificationCode.response';
-import { UserLoginResponse } from './responses/userLogin.response';
-import { UserRefreshResponse } from './responses/userRefresh.response';
+import { UserLoginDto } from './dto/userLogin.dto';
+import { UserRefreshTokenDto } from './dto/userRefreshToken.dto';
+import { UserRegistrationDto } from './dto/userRegistration.dto';
+import { UserVerificationDto } from './dto/userVerification.dto';
 import { UserForgotPasswordResponse } from './responses/userForgotPassword.response';
 import { UserForgotPasswordVerificationResponse } from './responses/userForgotPasswordVerification.response';
+import { UserLoginResponse } from './responses/userLogin.response';
+import { UserRefreshResponse } from './responses/userRefresh.response';
+import { UserRegistrationResponse } from './responses/userRegistration.response';
+import { UserResendVerificationCodeResponse } from './responses/userResendVerificationCode.response';
+import { UserVerifyResponse } from './responses/userVerify.response';
 import { ValidateResetPasswordResponse } from './responses/validateResetPasswordLink.response';
-import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
-import { RedisService } from 'src/libs/redis/redis.service';
-import { UserRefreshTokenDto } from './dto/userRefreshToken.dto';
-import { UsersType } from 'src/helpers/types/users/users.type';
 
 @Injectable()
 export class AuthService {
@@ -327,12 +327,18 @@ export class AuthService {
 
   private async checkUserExistence(email: string) {
     this.logger.log('Проверка существования пользователя...');
-    const emailExists = await this.userCommonService.findUserByEmail(email);
-    if (emailExists) {
+    const user = await this.userCommonService.findUserByEmail(email);
+    if (user.email) {
       this.logger.error(
         `Пользователь с адресом электронной почты ${email} уже существует`,
       );
       throw new ConflictException(`User with email ${email} already exists!`);
+    }
+
+    if (user.provider === 'google') {
+      throw new BadRequestException(
+        'You need to authorize with google and set password to use this type of authorization!',
+      );
     }
   }
 
