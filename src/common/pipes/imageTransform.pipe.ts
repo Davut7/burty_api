@@ -4,11 +4,11 @@ import {
   InternalServerErrorException,
   PipeTransform,
 } from '@nestjs/common';
-import { MinioService } from '../../libs/minio/minio.service';
+import { MediaType } from '@prisma/client';
 import { createReadStream } from 'fs';
 import { unlink } from 'fs/promises';
+import { MinioService } from '../../libs/minio/minio.service';
 import { ITransformedFile } from '../interfaces/fileTransform.interface';
-import { MediaType } from '@prisma/client';
 
 @Injectable()
 export class ImageTransformer implements PipeTransform<Express.Multer.File> {

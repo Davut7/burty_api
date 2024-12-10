@@ -1,0 +1,9 @@
+model SpacesFacilities {
+  spaceId     String        @db.Uuid
+  facilityId  String        @db.Uuid
+  space       Spaces        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  facility    Facilities    @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@id([spaceId, facilityId])
+  @@map("spaces_facilities")
+}

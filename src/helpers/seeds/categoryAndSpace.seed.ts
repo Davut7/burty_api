@@ -34,6 +34,9 @@ const imagePaths = [
 ];
 
 export async function seedCategoriesAndSpaces() {
+  await prisma.media.deleteMany();
+  await prisma.qrCodes.deleteMany();
+  await prisma.bookings.deleteMany();
   await prisma.spaces.deleteMany();
   await prisma.category.deleteMany();
 
