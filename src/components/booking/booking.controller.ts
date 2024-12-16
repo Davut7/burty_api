@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -29,7 +30,7 @@ export class BookingController {
   @CreateBookingOperation()
   async createBooking(
     @Body() dto: CreateBookingDto,
-    @Param('spaceId') spaceId: string,
+    @Param('spaceId', ParseUUIDPipe) spaceId: string,
     @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.bookingService.createBooking(dto, spaceId, currentUser);

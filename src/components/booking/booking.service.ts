@@ -4,16 +4,25 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { CreateBookingDto } from './dto/createBooking.dto';
-import { UserTokenDto } from '../token/dto/token.dto';
 import { BookingStatus, PassType } from '@prisma/client';
+import { addDays } from 'date-fns';
+import { createReadStream } from 'fs';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as QRCode from 'qrcode';
+import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
+import { MediaService } from 'src/libs/media/media.service';
+import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { UserTokenDto } from '../token/dto/token.dto';
+import { CreateBookingDto } from './dto/createBooking.dto';
 import { BookingTimeEnum, GetBookingsQuery } from './query/getBookings.query';
-import { subDays } from 'date-fns';
-
 @Injectable()
 export class BookingService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private mediaService: MediaService,
+    private imageTransformer: ImageTransformer,
+  ) {}
 
   async createBooking(
     dto: CreateBookingDto,
@@ -33,6 +42,13 @@ export class BookingService {
 
     if (sessionDateTime.getTime() < Date.now()) {
       throw new BadRequestException('Нельзя бронировать в прошлом');
+    }
+
+    const maxBookingDate = addDays(new Date(), 90);
+    if (sessionDateTime > maxBookingDate) {
+      throw new BadRequestException(
+        'Нельзя бронировать более чем на 90 дней вперед',
+      );
     }
 
     await this.checkBookingBusiness(sessionDateTime, dto.visitTime, spaceId);
@@ -61,7 +77,7 @@ export class BookingService {
       playersCount = 1;
     }
 
-    return await this.prismaService.bookings.create({
+    const booking = await this.prismaService.bookings.create({
       data: {
         spaceId,
         userId: currentUser.id,
@@ -74,6 +90,53 @@ export class BookingService {
         endTime: endHour.toString(),
       },
     });
+
+    const qrData = {
+      bookingId: booking.id,
+      spaceId,
+      userId: currentUser.id,
+      startDate: sessionDateTime,
+      passType: dto.passType,
+      startTime: startHour,
+      endTime: endHour,
+    };
+
+    const qrCodePath = `./temp/qr-code-${booking.id}.png`;
+    await QRCode.toFile(qrCodePath, JSON.stringify(qrData));
+
+    // Create a Multer.File-like object
+    const fileBuffer = await fs.readFile(qrCodePath);
+    const stats = await fs.stat(qrCodePath);
+
+    const multerFile: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: path.basename(qrCodePath),
+      encoding: '7bit',
+      mimetype: 'image/png',
+      size: stats.size,
+      buffer: fileBuffer,
+      destination: './temp',
+      filename: path.basename(qrCodePath),
+      path: qrCodePath,
+      stream: createReadStream(qrCodePath),
+    };
+
+    // Transform and store the QR code
+    const transformedFile = await this.imageTransformer.transform(multerFile);
+    const qrCode = await this.prismaService.qrCodes.create({
+      data: {
+        bookingId: booking.id,
+        userId: currentUser.id,
+      },
+    });
+
+    await this.mediaService.createFileMedia(
+      transformedFile,
+      qrCode.id,
+      'qrCodeId',
+    );
+
+    return booking;
   }
 
   async cancelBooking(bookingId: string, currentUser: UserTokenDto) {
@@ -92,14 +155,15 @@ export class BookingService {
   async getBookings(query: GetBookingsQuery, currentUser: UserTokenDto) {
     const { page = 1, take = 10, time = BookingTimeEnum.WEEK } = query;
 
-    const startDate = subDays(new Date(), time);
+    const startDate = new Date();
+    const endDate = addDays(new Date(), time);
 
     return await this.prismaService.bookings.findMany({
       where: {
         userId: currentUser.id,
         startDate: {
           gte: startDate,
-          lte: new Date(),
+          lte: endDate,
         },
       },
       include: {

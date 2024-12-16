@@ -1,22 +1,22 @@
 import {
   Controller,
   Get,
-  Query,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
-  HttpStatus,
-  HttpCode,
+  Query,
 } from '@nestjs/common';
-import { SpacesService } from './spaces.service';
-import { GetNearbySpacesQuery } from './query/getNearbySpaces.query';
-import { GetSpacesByFilterQuery } from './query/getSpacesByFilter.query';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { SpacesType } from 'src/helpers/types/spaces.type';
 import { GetNearbySpacesOperation } from './decorators/getNearbySpacesOperation.decorator';
+import { GetOneSpaceOperation } from './decorators/getOneSpaceOperation.decorator';
 import { GetPopularSpacesOperation } from './decorators/getPopularSpacesOperation.decorator';
 import { GetSpacesByFilterOperation } from './decorators/getSpacesByFilterOperation.decorator';
-import { GetOneSpaceOperation } from './decorators/getOneSpaceOperation.decorator';
-import { SpacesType } from 'src/helpers/types/spaces.type';
+import { GetNearbySpacesQuery } from './query/getNearbySpaces.query';
 import { GetOneSpaceQuery } from './query/getOneSpace.query';
+import { GetSpacesByFilterQuery } from './query/getSpacesByFilter.query';
+import { SpacesService } from './spaces.service';
 
 @ApiTags('spaces')
 @ApiBearerAuth()

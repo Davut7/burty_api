@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { CreateReviewDto } from './dto/createReview.dto';
-import { UserTokenDto } from '../token/dto/token.dto';
-import { UpdateReviewDto } from './dto/updateReview.dto';
 import { ReviewsCommonService } from '../common/reviewsCommon/reviewsCommon.service';
+import { UserTokenDto } from '../token/dto/token.dto';
+import { CreateReviewDto } from './dto/createReview.dto';
+import { UpdateReviewDto } from './dto/updateReview.dto';
 
 @Injectable()
 export class ReviewsService {
@@ -14,15 +14,21 @@ export class ReviewsService {
 
   async createReview(
     dto: CreateReviewDto,
-    spaceId: string,
+    bookingId: string,
     currentUser: UserTokenDto,
   ) {
-    await this.reviewsCommonService.checkBookingToReview(
-      spaceId,
+    const booking = await this.reviewsCommonService.checkBookingToReview(
+      bookingId,
       currentUser.id,
     );
+
+    await this.reviewsCommonService.checkReviewExists(
+      booking.spaceId,
+      currentUser.id,
+    );
+
     return await this.prismaService.reviews.create({
-      data: { ...dto, spaceId, userId: currentUser.id },
+      data: { ...dto, spaceId: booking.spaceId, userId: currentUser.id },
     });
   }
 
@@ -35,12 +41,10 @@ export class ReviewsService {
       reviewId,
       currentUser.id,
     );
-    await this.prismaService.reviews.update({
+    return await this.prismaService.reviews.update({
       where: { id: review.id },
       data: { ...dto },
     });
-
-    return review;
   }
 
   async deleteReview(reviewId: string, currentUser: UserTokenDto) {
@@ -57,8 +61,7 @@ export class ReviewsService {
       where: { spaceId },
       include: {
         user: {
-          select: { firstName: true, lastName: true },
-          include: { media: true },
+          select: { firstName: true, lastName: true, media: true },
         },
       },
     });

@@ -1,14 +1,17 @@
-import { Controller, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { MENTOR } from 'src/common/decorators/isMentor.decorator';
+import { UserTokenDto } from '../token/dto/token.dto';
 import { CommentsService } from './comments.service';
+import { CreateCommentOperation } from './decorators/createCommentOperation.decorator';
+import { DeleteCommentOperation } from './decorators/deleteCommentOperation.decorator';
+import { UpdateCommentOperation } from './decorators/updateCommentOperation.decorator';
 import { CreateCommentDto } from './dto/createComment.dto';
 import { UpdateCommentDto } from './dto/updateComment.dto';
-import { UserTokenDto } from '../token/dto/token.dto';
-import { ApiTags } from '@nestjs/swagger';
-import { CreateCommentOperation } from './decorators/createCommentOperation.decorator';
-import { UpdateCommentOperation } from './decorators/updateCommentOperation.decorator';
-import { DeleteCommentOperation } from './decorators/deleteCommentOperation.decorator';
 
 @ApiTags('Comments')
+@ApiBearerAuth()
+@MENTOR()
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
@@ -23,7 +26,7 @@ export class CommentsController {
     return this.commentsService.createComment(dto, currentUser, bookingId);
   }
 
-  @Put(':commentId')
+  @Patch(':commentId')
   @UpdateCommentOperation()
   async updateComment(
     @Param('commentId') commentId: string,

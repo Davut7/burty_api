@@ -1,25 +1,26 @@
 import {
-  Controller,
-  Post,
-  Delete,
   Body,
-  Param,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Patch,
-  Get,
+  Post,
 } from '@nestjs/common';
-import { ReviewsService } from './reviews.service';
-import { CreateReviewDto } from './dto/createReview.dto';
-import { UpdateReviewDto } from './dto/updateReview.dto';
-import { UserTokenDto } from '../token/dto/token.dto';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { USER } from 'src/common/decorators/isUser.decorator';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { USER } from 'src/common/decorators/isUser.decorator';
+import { UserTokenDto } from '../token/dto/token.dto';
 import { CreateReviewOperation } from './decorators/createReviewOperation.decorator';
-import { UpdateReviewOperation } from './decorators/updateReviewOperation.decorator';
 import { DeleteReviewOperation } from './decorators/deleteReviewOperation.decorator';
 import { GetReviewsBySpaceIdOperation } from './decorators/getReviewsBySpaceIdOperation.decorator';
+import { UpdateReviewOperation } from './decorators/updateReviewOperation.decorator';
+import { CreateReviewDto } from './dto/createReview.dto';
+import { UpdateReviewDto } from './dto/updateReview.dto';
+import { ReviewsService } from './reviews.service';
 
 @ApiTags('reviews')
 @ApiBearerAuth()
@@ -29,16 +30,16 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @CreateReviewOperation()
-  @Post(':spaceId')
+  @Post(':bookingId')
   @HttpCode(HttpStatus.CREATED)
   async createReview(
-    @Param('spaceId') spaceId: string,
+    @Param('bookingId', ParseUUIDPipe) bookingId: string,
     @Body() createReviewDto: CreateReviewDto,
     @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.reviewsService.createReview(
       createReviewDto,
-      spaceId,
+      bookingId,
       currentUser,
     );
   }
@@ -47,7 +48,7 @@ export class ReviewsController {
   @Patch(':reviewId')
   @HttpCode(HttpStatus.OK)
   async updateReview(
-    @Param('reviewId') reviewId: string,
+    @Param('reviewId', ParseUUIDPipe) reviewId: string,
     @Body() updateReviewDto: UpdateReviewDto,
     @CurrentUser() currentUser: UserTokenDto,
   ) {
@@ -60,7 +61,7 @@ export class ReviewsController {
 
   @GetReviewsBySpaceIdOperation()
   @Get(':spaceId')
-  async getReviewsBySpaceId(@Param('spaceId') spaceId: string) {
+  async getReviewsBySpaceId(@Param('spaceId', ParseUUIDPipe) spaceId: string) {
     return await this.reviewsService.getReviewsBySpaceId(spaceId);
   }
 
@@ -68,7 +69,7 @@ export class ReviewsController {
   @Delete(':reviewId')
   @HttpCode(HttpStatus.OK)
   async deleteReview(
-    @Param('reviewId') reviewId: string,
+    @Param('reviewId', ParseUUIDPipe) reviewId: string,
     @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.reviewsService.deleteReview(reviewId, currentUser);

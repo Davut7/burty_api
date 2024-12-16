@@ -50,9 +50,7 @@ export class AuthService {
   async userRegistration(
     dto: UserRegistrationDto,
   ): Promise<UserRegistrationResponse> {
-    console.log('🚀 ~ AuthService ~ dto:', dto);
     const { email, password, role } = dto;
-    console.log('🚀 ~ AuthService ~ email:', email);
     this.logger.log('Начало процесса регистрации пользователя...');
 
     await this.checkUserExistence(email);

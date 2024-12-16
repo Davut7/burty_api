@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 import { Readable } from 'typeorm/platform/PlatformTools';
@@ -108,9 +108,7 @@ export class MinioService implements OnModuleInit {
     }
 
     const endpoint = this.configService.getOrThrow<string>('MINIO_ENDPOINT');
-    console.log('🚀 ~ MinioService ~ getFileUrl ~ endpoint:', endpoint);
     const host = this.configService.getOrThrow<string>('MINIO_HOST');
-    console.log('🚀 ~ MinioService ~ getFileUrl ~ host:', host);
 
     return url.replace(endpoint, host);
   }

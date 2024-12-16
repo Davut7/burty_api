@@ -17,6 +17,7 @@ model Spaces {
   reviews     Reviews[]
   bookings Bookings[]
   medias Media[]
+  linkedSpaces  LinkedSpaces[]
 
   @@map("spaces")
 }

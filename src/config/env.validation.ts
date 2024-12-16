@@ -31,6 +31,8 @@ const configSchema = Joi.object({
   JWT_REFRESH_SECRET: Joi.string().required(),
   JWT_ACCESS_TIME: Joi.string().required(),
   JWT_REFRESH_TIME: Joi.string().required(),
+  JWT_RESET_SECRET: Joi.string().required(),
+  JWT_RESET_TIME: Joi.string().required(),
 
   MONGO_USERNAME: Joi.string().required(),
   MONGO_PASSWORD: Joi.string().required(),

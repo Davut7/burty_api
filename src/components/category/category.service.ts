@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CategoryResponseType } from 'src/helpers/types/category/category.response';
+import { CategoryType } from 'src/helpers/types/category/category.type';
 import { PrismaService } from '../../utils/prisma/prisma.service';
 import { GetCategoriesQuery } from './query/getCategories.query';
-import { CategoryType } from 'src/helpers/types/category/category.type';
-import { CategoryResponseType } from 'src/helpers/types/category/category.response';
 
 @Injectable()
 export class CategoryService {
@@ -19,7 +19,7 @@ export class CategoryService {
   async getOneCategory(categoryId: string): Promise<CategoryResponseType> {
     const category = await this.prismaService.category.findUnique({
       where: { id: categoryId },
-      include: { spaces: true },
+      include: { spaces: { include: { medias: true } } },
     });
     if (!category) {
       throw new NotFoundException('Category not found!');
