@@ -50,7 +50,9 @@ export class AuthService {
   async userRegistration(
     dto: UserRegistrationDto,
   ): Promise<UserRegistrationResponse> {
+    console.log('🚀 ~ AuthService ~ dto:', dto);
     const { email, password, role } = dto;
+    console.log('🚀 ~ AuthService ~ email:', email);
     this.logger.log('Начало процесса регистрации пользователя...');
 
     await this.checkUserExistence(email);
@@ -328,14 +330,14 @@ export class AuthService {
   private async checkUserExistence(email: string) {
     this.logger.log('Проверка существования пользователя...');
     const user = await this.userCommonService.findUserByEmail(email);
-    if (user.email) {
+    if (user && user.email) {
       this.logger.error(
         `Пользователь с адресом электронной почты ${email} уже существует`,
       );
       throw new ConflictException(`User with email ${email} already exists!`);
     }
 
-    if (user.provider === 'google') {
+    if (user && user.provider === 'google') {
       throw new BadRequestException(
         'You need to authorize with google and set password to use this type of authorization!',
       );
