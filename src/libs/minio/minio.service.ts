@@ -11,11 +11,11 @@ export class MinioService implements OnModuleInit {
 
   constructor(private configService: ConfigService) {
     this.minioClient = new Minio.Client({
-      endPoint: process.env.MINIO_HOST || 'localhost',
-      port: Number(process.env.MINIO_PORT) || 9000,
-      useSSL: process.env.MINIO_USE_SSL === 'true',
-      accessKey: process.env.MINIO_ROOT_USER,
-      secretKey: process.env.MINIO_ROOT_PASSWORD,
+      endPoint: this.configService.get('MINIO_HOST'),
+      port: Number(this.configService.get('MINIO_PORT')),
+      useSSL: this.configService.get('MINIO_USE_SSL'),
+      accessKey: this.configService.get('MINIO_ROOT_USER'),
+      secretKey: this.configService.get('MINIO_ROOT_PASSWORD'),
     });
 
     this.bucketName = this.configService.getOrThrow('MINIO_BUCKET_NAME');
