@@ -104,7 +104,6 @@ export class BookingService {
     const qrCodePath = `./temp/qr-code-${booking.id}.png`;
     await QRCode.toFile(qrCodePath, JSON.stringify(qrData));
 
-    // Create a Multer.File-like object
     const fileBuffer = await fs.readFile(qrCodePath);
     const stats = await fs.stat(qrCodePath);
 
@@ -121,7 +120,6 @@ export class BookingService {
       stream: createReadStream(qrCodePath),
     };
 
-    // Transform and store the QR code
     const transformedFile = await this.imageTransformer.transform(multerFile);
     const qrCode = await this.prismaService.qrCodes.create({
       data: {

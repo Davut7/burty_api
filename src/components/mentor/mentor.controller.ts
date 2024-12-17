@@ -1,15 +1,11 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  ParseUUIDPipe,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { MENTOR } from 'src/common/decorators/isMentor.decorator';
 import { UserTokenDto } from '../token/dto/token.dto';
+import { GetLinkedSpacesOperation } from './decorators/getLinkedSpacesOperation.decorator';
+import { GetMeOperation } from './decorators/getMeOperation.decorator';
+import { GetOneLinkedSpaceOperation } from './decorators/getOnelinkSpaceOperation.decorator';
 import { MentorService } from './mentor.service';
 
 @ApiTags('mentor')
@@ -20,19 +16,19 @@ export class MentorController {
   constructor(private readonly mentorService: MentorService) {}
 
   @Get('me')
-  @HttpCode(HttpStatus.OK)
+  @GetMeOperation()
   async getMe(@CurrentUser() currentUser: UserTokenDto) {
     return this.mentorService.getMe(currentUser.id);
   }
 
   @Get('linked-spaces')
-  @HttpCode(HttpStatus.OK)
+  @GetLinkedSpacesOperation()
   async getLinkedSpaces(@CurrentUser() currentUser: UserTokenDto) {
     return this.mentorService.getLinkedSpaces(currentUser.id);
   }
 
   @Get('linked-spaces/:spaceId')
-  @HttpCode(HttpStatus.OK)
+  @GetOneLinkedSpaceOperation()
   async getOneLinkedSpace(
     @CurrentUser() currentUser: UserTokenDto,
     @Param('spaceId', ParseUUIDPipe) spaceId: string,
