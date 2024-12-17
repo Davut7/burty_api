@@ -110,7 +110,7 @@ export class MinioService implements OnModuleInit {
     const endpoint = this.configService.getOrThrow<string>('MINIO_ENDPOINT');
     const host = this.configService.getOrThrow<string>('MINIO_HOST');
 
-    return url.replace(endpoint, host);
+    return url.replace(host, endpoint);
   }
 
   async deleteFile(fileName: string) {
