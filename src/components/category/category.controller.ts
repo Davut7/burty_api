@@ -1,15 +1,15 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
-import { CategoryService } from './category.service';
-import { GetCategoriesQuery } from './query/getCategories.query';
 import { ApiTags } from '@nestjs/swagger';
+import { PUBLIC } from 'src/common/decorators/isPublic.decorator';
+import { CategoryResponseType } from 'src/helpers/types/category/category.response';
+import { CategoryType } from 'src/helpers/types/category/category.type';
+import { CategoryService } from './category.service';
 import { GetCategoriesOperation } from './decorators/getCategoriesOperation.decorator';
 import { GetOneCategoryOperation } from './decorators/getOneCategoryOperation.decorator';
-import { USER } from 'src/common/decorators/isUser.decorator';
-import { CategoryType } from 'src/helpers/types/category/category.type';
-import { CategoryResponseType } from 'src/helpers/types/category/category.response';
+import { GetCategoriesQuery } from './query/getCategories.query';
 
 @ApiTags('Categories')
-@USER()
+@PUBLIC()
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
