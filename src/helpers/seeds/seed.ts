@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as QRCode from 'qrcode';
 import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
+import { generateHash } from 'src/helpers/providers/generateHash';
 import { Readable } from 'stream';
 import { MediaService } from '../../libs/media/media.service';
 import { MinioService } from '../../libs/minio/minio.service';
@@ -110,7 +111,7 @@ async function createUsersAndData() {
   const mentor = await prisma.users.create({
     data: {
       email: 'mentor@gmail.com',
-      password: 'Mentor1234!',
+      password: await generateHash('Mentor1234!'),
       role: 'MENTOR',
       isVerified: true,
       firstName: 'Mentor',
@@ -122,7 +123,7 @@ async function createUsersAndData() {
   const user = await prisma.users.create({
     data: {
       email: 'user@gmail.com',
-      password: 'Mentor1234!',
+      password: await generateHash('User1234!'),
       role: 'USER',
       isVerified: true,
       firstName: 'Regular',
