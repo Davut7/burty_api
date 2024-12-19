@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Reviews } from '@prisma/client';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
+import { UsersType } from './users/users.type';
 
 export class ReviewsType implements Reviews {
   @ApiProperty({ description: 'Reviews unique identifier' })
@@ -17,4 +18,8 @@ export class ReviewsType implements Reviews {
 
   @Exclude()
   userId: string;
+
+  @ApiProperty({ description: 'Review user' })
+  @Type(() => UsersType)
+  user: UsersType;
 }

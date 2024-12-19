@@ -53,7 +53,7 @@ export class SpacesService {
     const spaces = await this.prismaService.spaces.findMany({
       skip: (page - 1) * take,
       take,
-      include: { medias: true },
+      include: { medias: true, reviews: true },
     });
 
     return spaces
@@ -64,8 +64,15 @@ export class SpacesService {
           space.latitude,
           space.longitude,
         );
+
+        const { reviews, ...rest } = space;
+
         return {
-          ...space,
+          ...rest,
+          averageRating: reviews.length
+            ? reviews.reduce((sum, review) => sum + review.rating, 0) /
+              reviews.length
+            : 0,
           distanceInKm: kilometers,
           distanceInM: meters,
         };
@@ -100,11 +107,14 @@ export class SpacesService {
           space.latitude,
           space.longitude,
         );
+
+        const { reviews, ...rest } = space;
+
         return {
-          ...space,
-          average_rating: space.reviews.length
-            ? space.reviews.reduce((sum, review) => sum + review.rating, 0) /
-              space.reviews.length
+          ...rest,
+          averageRating: reviews.length
+            ? reviews.reduce((sum, review) => sum + review.rating, 0) /
+              reviews.length
             : 0,
           distance: {
             kilometers,
@@ -114,10 +124,10 @@ export class SpacesService {
       })
       .filter((space) => space.distance.kilometers <= maxDistance)
       .sort((a, b) => {
-        if (a.average_rating === b.average_rating) {
+        if (a.averageRating === b.averageRating) {
           return a.distance.kilometers - b.distance.kilometers;
         }
-        return b.average_rating - a.average_rating;
+        return b.averageRating - a.averageRating;
       });
   }
 
@@ -143,15 +153,17 @@ export class SpacesService {
         { description: { contains: q, mode: 'insensitive' } },
       ];
     }
+
     if (minPrice !== undefined || maxPrice !== undefined) {
-      where.price = {};
+      where.minPrice = {};
       if (minPrice !== undefined) {
-        where.price.gte = minPrice;
+        where.minPrice.gte = minPrice;
       }
       if (maxPrice !== undefined) {
-        where.price.lte = maxPrice;
+        where.maxPrice.lte = maxPrice;
       }
     }
+
     if (passType) {
       where.passType = passType;
     }
@@ -160,7 +172,10 @@ export class SpacesService {
       where,
       take,
       skip: (page - 1) * take,
-      include: { medias: true },
+      include: {
+        medias: true,
+        reviews: true,
+      },
     });
 
     return spaces
@@ -171,8 +186,15 @@ export class SpacesService {
           space.latitude,
           space.longitude,
         );
+
+        const { reviews, ...rest } = space;
+
         return {
-          ...space,
+          ...rest,
+          averageRating: reviews.length
+            ? reviews.reduce((sum, review) => sum + review.rating, 0) /
+              reviews.length
+            : 0,
           distance: {
             kilometers,
             meters,
@@ -180,7 +202,12 @@ export class SpacesService {
         };
       })
       .filter((space) => space.distance.kilometers <= maxDistance)
-      .sort((a, b) => a.distance.kilometers - b.distance.kilometers);
+      .sort((a, b) => {
+        if (a.averageRating === b.averageRating) {
+          return a.distance.kilometers - b.distance.kilometers;
+        }
+        return b.averageRating - a.averageRating;
+      });
   }
 
   async getOneSpace(
@@ -188,6 +215,7 @@ export class SpacesService {
     query: GetOneSpaceQuery,
   ): Promise<GetSpacesResponse> {
     const { latitude, longitude } = query;
+
     const space = await this.prismaService.spaces.findUnique({
       where: { id: spaceId },
       include: {
@@ -213,8 +241,14 @@ export class SpacesService {
       space.longitude,
     );
 
+    const averageRating = space.reviews.length
+      ? space.reviews.reduce((sum, review) => sum + review.rating, 0) /
+        space.reviews.length
+      : 0;
+
     return {
       ...space,
+      averageRating,
       distanceInKm: kilometers,
       distanceInM: meters,
     };

@@ -11,7 +11,7 @@ export class MentorService {
       include: {
         linkedSpaces: {
           include: {
-            space: true,
+            space: { include: { medias: true } },
           },
         },
       },
@@ -28,11 +28,25 @@ export class MentorService {
     const linkedSpaces = await this.prismaService.linkedSpaces.findMany({
       where: { mentorId: userId },
       include: {
-        space: true,
+        space: {
+          include: { medias: true, reviews: true },
+        },
       },
     });
 
-    return linkedSpaces.map((link) => link.space);
+    return linkedSpaces.map((link) => {
+      const { space } = link;
+      const averageRating = space.reviews.length
+        ? space.reviews.reduce((sum, review) => sum + review.rating, 0) /
+          space.reviews.length
+        : 0;
+
+      return {
+        ...space,
+        averageRating,
+        reviews: space.reviews,
+      };
+    });
   }
 
   async getOneLinkedSpace(userId: string, spaceId: string) {
@@ -42,7 +56,9 @@ export class MentorService {
         spaceId,
       },
       include: {
-        space: true,
+        space: {
+          include: { medias: true, reviews: true },
+        },
       },
     });
 
@@ -50,6 +66,16 @@ export class MentorService {
       throw new NotFoundException('Linked space not found');
     }
 
-    return linkedSpace.space;
+    const { space } = linkedSpace;
+    const averageRating = space.reviews.length
+      ? space.reviews.reduce((sum, review) => sum + review.rating, 0) /
+        space.reviews.length
+      : 0;
+
+    return {
+      ...space,
+      averageRating,
+      reviews: space.reviews,
+    };
   }
 }

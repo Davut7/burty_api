@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import { MinioService } from '../../libs/minio/minio.service';
-import { ITransformedFile } from '../../common/interfaces/fileTransform.interface';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { ITransformedFile } from '../../common/interfaces/fileTransform.interface';
+import { MinioService } from '../../libs/minio/minio.service';
 
 @Injectable()
 export class MediaService {

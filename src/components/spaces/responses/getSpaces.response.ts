@@ -11,4 +11,7 @@ export class GetSpacesResponse extends SpacesType {
     description: 'Distance between client and space in metres',
   })
   distanceInM: number;
+
+  @ApiProperty({ description: 'Avarage rating of space' })
+  averageRating: number;
 }

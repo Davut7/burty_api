@@ -179,7 +179,10 @@ export class BookingService {
   async getOneBooking(bookingId: string, currentUser: UserTokenDto) {
     const booking = await this.prismaService.bookings.findUnique({
       where: { id: bookingId, userId: currentUser.id },
-      include: { spaces: { include: { medias: true } } },
+      include: {
+        spaces: { include: { medias: true } },
+        qrCode: { include: { medias: true } },
+      },
     });
 
     if (!booking) {

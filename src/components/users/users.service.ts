@@ -4,14 +4,14 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { UserTokenDto } from '../token/dto/token.dto';
 import { ITransformedFile } from 'src/common/interfaces/fileTransform.interface';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
-import { MediaService } from 'src/libs/media/media.service';
-import { UpdateUserProfileDto } from './dto/updateUserProfile.dto';
 import { generateHash } from 'src/helpers/providers/generateHash';
 import { UsersType } from 'src/helpers/types/users/users.type';
+import { MediaService } from 'src/libs/media/media.service';
+import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { UserTokenDto } from '../token/dto/token.dto';
+import { UpdateUserProfileDto } from './dto/updateUserProfile.dto';
 
 @Injectable()
 export class UsersService {
@@ -52,8 +52,9 @@ export class UsersService {
       this.logger.log(
         `Фото профиля успешно загружено для пользователя с ID: ${currentUser.id}`,
       );
-
-      await this.mediaService.createFileMedia(image, user.id, 'userId');
+      return {
+        message: 'Фото профиля успешно загружено!',
+      };
     }
 
     await this.mediaService.createFileMedia(image, user.id, 'userId');

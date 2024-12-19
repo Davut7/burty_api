@@ -79,8 +79,11 @@ export class AuthService {
         return { message: 'Регистрация пользователя успешна', user };
       });
     } catch (error: any) {
-      this.logger.error('Ошибка регистрации пользователя: ', error.message);
-      throw new BadRequestException('Ошибка регистрации пользователя');
+      if (!(error instanceof ConflictException)) {
+        this.logger.error('Ошибка регистрации пользователя: ', error.message);
+        throw new BadRequestException('Ошибка регистрации пользователя');
+      }
+      throw error;
     }
   }
 
@@ -328,14 +331,14 @@ export class AuthService {
   private async checkUserExistence(email: string) {
     this.logger.log('Проверка существования пользователя...');
     const user = await this.userCommonService.findUserByEmail(email);
-    if (user && user.email) {
+    if (user || user?.email) {
       this.logger.error(
         `Пользователь с адресом электронной почты ${email} уже существует`,
       );
       throw new ConflictException(`User with email ${email} already exists!`);
     }
 
-    if (user && user.provider === 'google') {
+    if (user || user?.provider === 'google') {
       throw new BadRequestException(
         'You need to authorize with google and set password to use this type of authorization!',
       );
