@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { MENTOR } from 'src/common/decorators/isMentor.decorator';
 import { UserTokenDto } from '../token/dto/token.dto';
 import { CommentsService } from './comments.service';
@@ -21,7 +22,7 @@ export class CommentsController {
   async createComment(
     @Body() dto: CreateCommentDto,
     @Param('bookingId') bookingId: string,
-    currentUser: UserTokenDto,
+    @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.commentsService.createComment(dto, currentUser, bookingId);
   }
@@ -31,7 +32,7 @@ export class CommentsController {
   async updateComment(
     @Param('commentId') commentId: string,
     @Body() dto: UpdateCommentDto,
-    currentUser: UserTokenDto,
+    @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.commentsService.updateComment(dto, commentId, currentUser);
   }
@@ -40,7 +41,7 @@ export class CommentsController {
   @DeleteCommentOperation()
   async deleteComment(
     @Param('commentId') commentId: string,
-    currentUser: UserTokenDto,
+    @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.commentsService.deleteComment(commentId, currentUser);
   }
