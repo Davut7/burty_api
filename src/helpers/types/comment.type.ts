@@ -19,5 +19,5 @@ export class CommentType implements Comments {
   createdAt: Date;
 
   @Exclude()
-  userId: string;
+  mentorId: string;
 }

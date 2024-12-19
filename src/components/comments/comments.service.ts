@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { CreateCommentDto } from './dto/createComment.dto';
-import { UserTokenDto } from '../token/dto/token.dto';
+import { BookingCommonService } from '../common/bookingCommon/bookingCommon.service';
 import { CommentCommonService } from '../common/commentCommon/commentCommon.service';
+import { UserTokenDto } from '../token/dto/token.dto';
+import { CreateCommentDto } from './dto/createComment.dto';
 import { UpdateCommentDto } from './dto/updateComment.dto';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class CommentsService {
   constructor(
     private prismaService: PrismaService,
     private commentCommonService: CommentCommonService,
+    private bookingCommonService: BookingCommonService,
   ) {}
 
   async createComment(
@@ -17,8 +19,17 @@ export class CommentsService {
     currentUser: UserTokenDto,
     bookingId: string,
   ) {
+    const booking = await this.bookingCommonService.findBookingById(
+      bookingId,
+      currentUser.id,
+    );
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found!');
+    }
+
     const comment = await this.prismaService.comments.create({
-      data: { comment: dto.comment, userId: currentUser.id, bookingId },
+      data: { comment: dto.comment, mentorId: currentUser.id, bookingId },
     });
 
     return { message: 'Comments created successfully!', comment };

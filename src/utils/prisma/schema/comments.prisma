@@ -1,11 +1,11 @@
 model Comments {
     id String @id @default(uuid()) @db.Uuid
-    comment String
+    comment   String
     createdAt DateTime @map("created_at") @default(now())
-    userId String @map("user_id") @db.Uuid
+    mentorId String @map("mentor_id") @db.Uuid
     bookingId String @map("booking_id") @db.Uuid
-    user Users @relation(fields: [userId], references: [id])
-    booking Bookings @relation(fields: [bookingId], references: [id])
+    user      Users @relation(fields: [mentorId], references: [id])
+    booking   Bookings @relation(fields: [bookingId], references: [id])
 
     @@map("comments")
 }

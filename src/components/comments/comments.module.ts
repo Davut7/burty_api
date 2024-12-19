@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { CommentsService } from './comments.service';
-import { CommentsController } from './comments.controller';
+import { BookingCommonModule } from '../common/bookingCommon/bookingCommon.module';
 import { CommentCommonModule } from '../common/commentCommon/commentCommon.module';
+import { CommentsController } from './comments.controller';
+import { CommentsService } from './comments.service';
 
 @Module({
-  imports:[CommentCommonModule],
+  imports: [CommentCommonModule, BookingCommonModule],
   controllers: [CommentsController],
   providers: [CommentsService],
 })
