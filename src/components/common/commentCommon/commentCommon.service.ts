@@ -7,9 +7,9 @@ export class CommentCommonService {
 
   async findCommentBySpaceId() {}
 
-  async findCommentById(commentId: string, userId) {
+  async findCommentById(commentId: string) {
     const comment = await this.prismaService.comments.findUnique({
-      where: { id: commentId, userId },
+      where: { id: commentId },
     });
 
     if (!comment) {

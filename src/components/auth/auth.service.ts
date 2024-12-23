@@ -79,11 +79,7 @@ export class AuthService {
         return { message: 'Регистрация пользователя успешна', user };
       });
     } catch (error: any) {
-      if (!(error instanceof ConflictException)) {
-        this.logger.error('Ошибка регистрации пользователя: ', error.message);
-        throw new BadRequestException('Ошибка регистрации пользователя');
-      }
-      throw error;
+      this.handleRegistrationError(error);
     }
   }
 
@@ -93,14 +89,7 @@ export class AuthService {
   ): Promise<UserVerifyResponse> {
     this.logger.log('Проверка подлинности пользователя...');
     const user = await this.userCommonService.findUserById(userId);
-    if (!user) {
-      this.logger.error('Пользователь не найден');
-      throw new NotFoundException('Пользователь не найден');
-    }
-    if (user.isVerified) {
-      this.logger.error('Пользователь уже подтвержден');
-      throw new BadRequestException('Пользователь уже подтвержден');
-    }
+    this.checkUserExistenceForVerification(user);
 
     await this.validateVerificationCode(dto, user);
 
@@ -120,16 +109,7 @@ export class AuthService {
   ): Promise<UserResendVerificationCodeResponse> {
     this.logger.log('Повторная отправка кода подтверждения...');
     const user = await this.userCommonService.findUserById(userId);
-
-    if (!user) {
-      this.logger.error('Пользователь не найден!');
-      throw new NotFoundException('Пользователь не найден!');
-    }
-
-    if (user.isVerified) {
-      this.logger.error('Пользователь уже подтвержден');
-      throw new BadRequestException('Пользователь уже подтвержден');
-    }
+    this.checkUserExistenceForVerification(user);
 
     const code = generateVerificationCodeAndExpiry();
 
@@ -145,18 +125,7 @@ export class AuthService {
   async userLogin(dto: UserLoginDto): Promise<UserLoginResponse> {
     this.logger.log('Попытка входа пользователя...');
     const user = await this.userCommonService.findUserByEmail(dto.email);
-
-    if (!user) {
-      this.logger.error(`Пользователь с почтой ${dto.email} не найден`);
-      throw new NotFoundException(
-        `Пользователь с почтой ${dto.email} не найден!`,
-      );
-    }
-
-    if (!user.isVerified) {
-      this.logger.error('Пользователь не подтвержден');
-      throw new BadRequestException('Пользователь не подтвержден');
-    }
+    this.checkUserExistenceForLogin(user, dto.email);
 
     const isPasswordCorrect = await verifyHash(dto.password, user.password);
 
@@ -343,6 +312,37 @@ export class AuthService {
         'You need to authorize with google and set password to use this type of authorization!',
       );
     }
+  }
+
+  private checkUserExistenceForVerification(user: Users) {
+    if (!user) {
+      this.logger.error('Пользователь не найден');
+      throw new NotFoundException('Пользователь не найден');
+    }
+    if (user.isVerified) {
+      this.logger.error('Пользователь уже подтвержден');
+      throw new BadRequestException('Пользователь уже подтвержден');
+    }
+  }
+
+  private checkUserExistenceForLogin(user: Users, email: string) {
+    if (!user) {
+      this.logger.error(`Пользователь с почтой ${email} не найден`);
+      throw new NotFoundException(`Пользователь с почтой ${email} не найден!`);
+    }
+
+    if (!user.isVerified) {
+      this.logger.error('Пользователь не подтвержден');
+      throw new BadRequestException('Пользователь не подтвержден');
+    }
+  }
+
+  private handleRegistrationError(error: any) {
+    if (!(error instanceof ConflictException)) {
+      this.logger.error('Ошибка регистрации пользователя: ', error.message);
+      throw new BadRequestException('Ошибка регистрации пользователя');
+    }
+    throw error;
   }
 
   private async validateVerificationCode(

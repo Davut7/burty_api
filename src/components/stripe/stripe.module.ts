@@ -9,7 +9,7 @@ import Stripe from 'stripe';
       provide: 'STRIPE_CLIENT',
       useFactory: (configService: ConfigService) => {
         return new Stripe(configService.get<string>('STRIPE_SECRET_KEY'), {
-          apiVersion: '2024-11-20.acacia',
+          apiVersion: '2024-12-18.acacia',
         });
       },
       inject: [ConfigService],

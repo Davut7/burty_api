@@ -96,17 +96,8 @@ export class AuthController {
   @UserLogoutOperation()
   @HttpCode(200)
   async logout(@Body() dto: UserRefreshTokenDto, @Req() req: FastifyRequest) {
-    const { headers } = req;
-
-    const authorizationHeader = headers.authorization;
-    if (!authorizationHeader) {
-      throw new UnauthorizedException('User unauthorized!');
-    }
-
-    const accessToken = authorizationHeader.split(' ')[1];
-
+    const accessToken = this.extractAccessToken(req);
     await this.redisService.setTokenWithExpiry(accessToken, accessToken);
-
     return await this.authService.logoutUser(dto);
   }
 
@@ -145,5 +136,14 @@ export class AuthController {
     @Query('userId') userId: string,
   ): Promise<ValidateResetPasswordResponse> {
     return await this.authService.validateResetPasswordLink(resetToken, userId);
+  }
+
+  private extractAccessToken(req: FastifyRequest): string {
+    const { headers } = req;
+    const authorizationHeader = headers.authorization;
+    if (!authorizationHeader) {
+      throw new UnauthorizedException('User unauthorized!');
+    }
+    return authorizationHeader.split(' ')[1];
   }
 }

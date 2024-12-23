@@ -40,10 +40,7 @@ export class CommentsService {
     commentId: string,
     currentUser: UserTokenDto,
   ) {
-    const comment = await this.commentCommonService.findCommentById(
-      commentId,
-      currentUser.id,
-    );
+    const comment = await this.commentCommonService.findCommentById(commentId);
 
     const updatedComment = await this.prismaService.comments.update({
       where: { id: comment.id },
@@ -54,10 +51,7 @@ export class CommentsService {
   }
 
   async deleteComment(commentId: string, currentUser: UserTokenDto) {
-    const comment = await this.commentCommonService.findCommentById(
-      commentId,
-      currentUser.id,
-    );
+    const comment = await this.commentCommonService.findCommentById(commentId);
 
     await this.prismaService.comments.delete({ where: { id: comment.id } });
 
