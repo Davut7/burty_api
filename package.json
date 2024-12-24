@@ -9,9 +9,9 @@
     "prisma:generate:prod": "dotenv -e .production.env -- prisma generate  --schema ./src/utils/prisma/schema",
     "prisma:migrate:prod": "dotenv -e .production.env -- prisma migrate dev --preview-feature --schema ./src/utils/prisma/schema",
     "prisma:migrate:deploy:prod": "dotenv -e .production.env -- prisma migrate deploy --preview-feature --schema ./src/utils/prisma/schema",
-    "prisma:generate:test": "dotenv -e .test.env -- prisma generate  --schema ./src/utils/prisma/schema",
-    "prisma:migrate:test": "dotenv -e .test.env -- prisma migrate dev --preview-feature --schema ./src/utils/prisma/schema",
-    "prisma:migrate:deploy:test": "dotenv -e .test.env -- prisma migrate deploy --preview-feature --schema ./src/utils/prisma/schema",
+    "prisma:generate:test": "npx dotenv -e .test.env -- prisma generate  --schema ./src/utils/prisma/schema",
+    "prisma:migrate:test": "npx dotenv -e .test.env -- prisma migrate dev --preview-feature --schema ./src/utils/prisma/schema",
+    "prisma:migrate:deploy:test": "npx dotenv -e .test.env -- prisma migrate deploy --preview-feature --schema ./src/utils/prisma/schema",
     "prisma:generate:dev": "dotenv -e .development.env -- prisma generate --schema ./src/utils/prisma/schema",
     "prisma:format:dev": "dotenv -e .development.env -- prisma format --schema ./src/utils/prisma/schema",
     "prisma:migrate:dev": "dotenv -e .development.env -- prisma migrate dev --preview-feature --schema ./src/utils/prisma/schema",
@@ -36,7 +36,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --watchAll --detectOpenHandles --maxWorkers=6"
+    "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json --watchAll --detectOpenHandles --maxWorkers=6 -- --verbose"
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
