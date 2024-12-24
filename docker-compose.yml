@@ -11,11 +11,11 @@ services:
     ports:
       - '5005:5005'
     depends_on:
-      postgres:
+      burty_postgres:
         condition: service_healthy
-      redis:
+      burty_redis:
         condition: service_healthy
-      mongodb:
+      burty_mongodb:
         condition: service_healthy
     restart: unless-stopped
     command: >
@@ -49,11 +49,11 @@ services:
     ports:
       - '5007:5005'
     depends_on:
-      postgres:
+      burty_postgres:
         condition: service_healthy
-      redis:
+      burty_redis:
         condition: service_healthy
-      mongodb:
+      burty_mongodb:
         condition: service_healthy
     restart: unless-stopped
     command: >
