@@ -1,13 +1,9 @@
 services:
-  app_v1:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: burty_app_v1
-    labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.app_v1.rule=Host(`burty-api.ru`)'
-      - 'traefik.http.services.app_v1.loadbalancer.server.port=5005'
+    container_name: burty_app
     ports:
       - '5005:5005'
     depends_on:
@@ -22,46 +18,10 @@ services:
       sh -c "
       npm run prisma:migrate:deploy:test &&
       npm run prisma:generate:test &&
-      node node_modules/.bin/nest start
+      npm run start:test
       "
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'curl -f -H "Authorization: Bearer ${HEALTH_CHECK_TOKEN}" http://localhost:5005/api/health || exit 1',
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    networks:
-      - burty_network
-
-  app_v2:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: burty_app_v2
-    labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.app_v2.rule=Host(`burty-api.ru`)'
-      - 'traefik.http.services.app_v2.loadbalancer.server.port=5007'
-    ports:
-      - '5007:5005'
-    depends_on:
-      burty_postgres:
-        condition: service_healthy
-      burty_redis:
-        condition: service_healthy
-      burty_mongodb:
-        condition: service_healthy
-    restart: unless-stopped
-    command: >
-      sh -c "
-      npm run prisma:migrate:deploy:prod &&
-      npm run prisma:generate:prod &&
-      node node_modules/.bin/nest start
-      "
+    mem_limit: 3g
+    mem_reservation: 1.5g
     healthcheck:
       test:
         [
