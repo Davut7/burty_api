@@ -180,7 +180,7 @@ async function createUsersAndData() {
   await prisma.comments.create({
     data: {
       comment: 'Thank you for your feedback!',
-      userId: mentor.id,
+      mentorId: mentor.id,
       bookingId: booking.id,
     },
   });
