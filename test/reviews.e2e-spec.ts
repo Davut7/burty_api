@@ -58,7 +58,6 @@ describe('ReviewsController (e2e)', () => {
       data: {
         userId: user.id,
         spaceId: space.id,
-        passType: 'duo',
         startDate: faker.date.recent(),
         startTime: faker.date.recent().toDateString(),
         endTime: faker.date.future().toDateString(),
