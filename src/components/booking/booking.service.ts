@@ -4,13 +4,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { BookingStatus, PassType } from '@prisma/client';
+import { BookingStatus } from '@prisma/client';
 import { addDays } from 'date-fns';
 import { createReadStream } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as QRCode from 'qrcode';
 import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
+import { CommentType } from 'src/helpers/types/comment.type';
 import { MediaService } from 'src/libs/media/media.service';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { UserTokenDto } from '../token/dto/token.dto';
@@ -29,6 +30,13 @@ export class BookingService {
     spaceId: string,
     currentUser: UserTokenDto,
   ) {
+    const space = await this.prismaService.spaces.findUnique({
+      where: { id: spaceId },
+    });
+    if (!space) {
+      throw new NotFoundException('Space not found!');
+    }
+
     const [day, month, year] = dto.startDate.toString().split('.').map(Number);
 
     const [startHour, endHour] = dto.visitTime.split('-');
@@ -53,29 +61,16 @@ export class BookingService {
 
     await this.checkBookingBusiness(sessionDateTime, dto.visitTime, spaceId);
 
-    const space = await this.prismaService.spaces.findUnique({
-      where: { id: spaceId },
-    });
+    if (space.maxPlayers < dto.playersCount) {
+      throw new BadRequestException(
+        `Максимальное количество игроков для этого пространства: ${space.maxPlayers}`,
+      );
+    }
 
     let bookingPrice: number;
     let playersCount: number;
 
-    if (dto.passType === PassType.full) {
-      bookingPrice = space.maxPrice;
-      playersCount = space.maxPlayers;
-    } else if (dto.passType === PassType.duo) {
-      bookingPrice = space.minPrice * 2;
-      playersCount = 2;
-    } else if (dto.passType === PassType.squad) {
-      bookingPrice = space.minPrice * 4;
-      playersCount = 4;
-    } else if (dto.passType === PassType.team) {
-      bookingPrice = space.minPrice * 5;
-      playersCount = 5;
-    } else if (dto.passType === PassType.single) {
-      bookingPrice = space.minPrice;
-      playersCount = 1;
-    }
+    bookingPrice = space.minPrice * dto.playersCount;
 
     const booking = await this.prismaService.bookings.create({
       data: {
@@ -85,7 +80,6 @@ export class BookingService {
         playersCount,
         status: BookingStatus.pending,
         startDate: sessionDateTime,
-        passType: dto.passType,
         startTime: startHour.toString(),
         endTime: endHour.toString(),
       },
@@ -96,7 +90,6 @@ export class BookingService {
       spaceId,
       userId: currentUser.id,
       startDate: sessionDateTime,
-      passType: dto.passType,
       startTime: startHour,
       endTime: endHour,
     };
@@ -190,6 +183,17 @@ export class BookingService {
     }
 
     return booking;
+  }
+
+  async getBookingComments(
+    bookingId: string,
+    currentUser: UserTokenDto,
+  ): Promise<CommentType[]> {
+    const booking = await this.getOneBooking(bookingId, currentUser);
+
+    return await this.prismaService.comments.findMany({
+      where: { bookingId: booking.id },
+    });
   }
 
   private async findBookingById(bookingId: string, userId: string) {

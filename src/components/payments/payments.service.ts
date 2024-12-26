@@ -4,14 +4,14 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/utils/prisma/prisma.service';
-import { UserTokenDto } from '../token/dto/token.dto';
-import { BookingCommonService } from '../common/bookingCommon/bookingCommon.service';
+import { stat, unlink } from 'fs/promises';
+import { join } from 'path';
 import * as QRCode from 'qrcode';
 import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe'; //
-import { join } from 'path';
-import { unlink, stat } from 'fs/promises';
 import { MediaService } from 'src/libs/media/media.service';
+import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { BookingCommonService } from '../common/bookingCommon/bookingCommon.service';
+import { UserTokenDto } from '../token/dto/token.dto';
 
 @Injectable()
 export class PaymentsService {
@@ -48,7 +48,6 @@ export class PaymentsService {
       endTime: booking.endTime,
       playerCount: booking.playersCount,
       startDate: booking.startDate.toISOString(),
-      passType: booking.passType,
       price: booking.price,
     });
 

@@ -1,16 +1,4 @@
 {
-  "sqltools.connections": [
-    {
-      "previewLimit": 50,
-      "server": "localhost",
-      "port": 5432,
-      "askForPassword": true,
-      "driver": "PostgreSQL",
-      "name": "postgres",
-      "database": "postgres",
-      "username": "postgres"
-    }
-  ],
   "yaml.schemas": {
     "https://www.artillery.io/schema.json": []
   }

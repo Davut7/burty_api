@@ -3,6 +3,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { MENTOR } from 'src/common/decorators/isMentor.decorator';
 import { UserTokenDto } from '../token/dto/token.dto';
+import { GetBookingByQrCodeOperation } from './decorators/getBookingByQrCodeOperation.decorator';
+import { GetLinkedSpaceBookingsOperation } from './decorators/getLinkedSpaceBookingsOperation.decorator';
 import { GetLinkedSpacesOperation } from './decorators/getLinkedSpacesOperation.decorator';
 import { GetMeOperation } from './decorators/getMeOperation.decorator';
 import { GetOneLinkedSpaceOperation } from './decorators/getOnelinkSpaceOperation.decorator';
@@ -34,5 +36,25 @@ export class MentorController {
     @Param('spaceId', ParseUUIDPipe) spaceId: string,
   ) {
     return this.mentorService.getOneLinkedSpace(currentUser.id, spaceId);
+  }
+
+  @Get('linked-spaces/:spaceId/bookings')
+  @GetLinkedSpaceBookingsOperation()
+  async getLinkedSpaceBookings(
+    @CurrentUser() currentUser: UserTokenDto,
+    @Param('spaceId', ParseUUIDPipe) spaceId: string,
+  ) {
+    return await this.mentorService.getBookingsByLinkedSpace(
+      spaceId,
+      currentUser,
+    );
+  }
+
+  @Get('bookings/:bookingId')
+  @GetBookingByQrCodeOperation()
+  async getBookingByQrCode(
+    @Param('bookingId', ParseUUIDPipe) bookingId: string,
+  ) {
+    return await this.mentorService.getBookingByQrCode(bookingId);
   }
 }

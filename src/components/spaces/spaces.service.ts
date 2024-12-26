@@ -142,9 +142,12 @@ export class SpacesService {
       latitude,
       longitude,
       minPrice,
-      passType,
+      maxPlayers,
+      minPlayers,
       q = '',
     } = query;
+    console.log('🚀 ~ SpacesService ~ minPlayers:', minPlayers);
+    console.log('🚀 ~ SpacesService ~ maxPlayers:', maxPlayers);
 
     const where: any = {};
     if (q) {
@@ -156,16 +159,36 @@ export class SpacesService {
 
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.minPrice = {};
+      where.maxPrice = {};
+
       if (minPrice !== undefined) {
         where.minPrice.gte = minPrice;
+      } else {
+        delete where.minPrice;
       }
+
       if (maxPrice !== undefined) {
         where.maxPrice.lte = maxPrice;
+      } else {
+        delete where.maxPrice;
       }
     }
 
-    if (passType) {
-      where.passType = passType;
+    if (minPlayers !== undefined || maxPlayers !== undefined) {
+      where.minPlayers = {};
+      where.maxPlayers = {};
+
+      if (minPlayers !== undefined) {
+        where.minPlayers.gte = minPlayers;
+      } else {
+        delete where.minPlayers;
+      }
+
+      if (maxPlayers !== undefined) {
+        where.maxPlayers.lte = maxPlayers;
+      } else {
+        delete where.maxPlayers;
+      }
     }
 
     const spaces = await this.prismaService.spaces.findMany({

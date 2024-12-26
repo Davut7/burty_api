@@ -15,8 +15,8 @@ model Spaces {
   maxPlayers  Int      @map("max_players")
   category    Category? @relation(fields: [categoryId], references: [id])
   reviews     Reviews[]
-  bookings Bookings[]
-  medias Media[]
+  bookings    Bookings[]
+  medias      Media[]
   linkedSpaces  LinkedSpaces[]
 
   @@map("spaces")

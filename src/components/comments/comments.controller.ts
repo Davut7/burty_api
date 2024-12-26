@@ -1,11 +1,22 @@
-import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { MENTOR } from 'src/common/decorators/isMentor.decorator';
+import { CommentType } from 'src/helpers/types/comment.type';
 import { UserTokenDto } from '../token/dto/token.dto';
 import { CommentsService } from './comments.service';
 import { CreateCommentOperation } from './decorators/createCommentOperation.decorator';
 import { DeleteCommentOperation } from './decorators/deleteCommentOperation.decorator';
+import { GetBookingCommentsOperation } from './decorators/getBookingCommentsOperation.decorator';
 import { UpdateCommentOperation } from './decorators/updateCommentOperation.decorator';
 import { CreateCommentDto } from './dto/createComment.dto';
 import { UpdateCommentDto } from './dto/updateComment.dto';
@@ -25,6 +36,15 @@ export class CommentsController {
     @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.commentsService.createComment(dto, currentUser, bookingId);
+  }
+
+  @Get(':bookingId')
+  @GetBookingCommentsOperation()
+  async getCommentsByBookingId(
+    @Param('bookingId', ParseUUIDPipe) bookingId: string,
+    @CurrentUser() currentUser: UserTokenDto,
+  ): Promise<CommentType[]> {
+    return await this.commentsService.getComments(bookingId, currentUser);
   }
 
   @Patch(':commentId')

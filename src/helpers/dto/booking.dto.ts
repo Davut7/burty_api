@@ -1,14 +1,12 @@
-import { PickType } from '@nestjs/swagger';
-import { BookingType } from '../types/booking.type';
-import { $Enums } from '@prisma/client';
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 import { IsValidStartDate } from 'src/common/decorators/isValidDate.decorator';
 import { IsValidVisitTime } from 'src/common/decorators/isValidVisitTime.decorator';
 
-export class BookingDto extends PickType(BookingType, ['passType']) {
+export class BookingDto {
+  @IsInt()
+  @IsPositive()
   @IsNotEmpty()
-  @IsEnum($Enums.PassType)
-  passType: $Enums.PassType;
+  playersCount: number;
 
   @IsNotEmpty()
   @IsValidStartDate()

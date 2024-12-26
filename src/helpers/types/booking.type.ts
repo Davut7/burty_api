@@ -1,5 +1,5 @@
-import { $Enums, Bookings } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { $Enums, Bookings } from '@prisma/client';
 
 export class BookingType implements Bookings {
   @ApiProperty({
@@ -7,13 +7,6 @@ export class BookingType implements Bookings {
     example: 'e3dcbf5a-cf5d-49b8-bfda-c27945897b78',
   })
   id: string;
-
-  @ApiProperty({
-    description: 'Type of pass associated with the booking',
-    enum: $Enums.PassType,
-    example: $Enums.PassType.single,
-  })
-  passType: $Enums.PassType;
 
   @ApiProperty({
     description: 'The number of players associated with the booking',

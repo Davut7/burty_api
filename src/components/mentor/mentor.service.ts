@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { BookingType } from 'src/helpers/types/booking.type';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
+import { UserTokenDto } from '../token/dto/token.dto';
 
 @Injectable()
 export class MentorService {
@@ -24,9 +26,9 @@ export class MentorService {
     return mentor;
   }
 
-  async getLinkedSpaces(userId: string) {
+  async getLinkedSpaces(mentorId: string) {
     const linkedSpaces = await this.prismaService.linkedSpaces.findMany({
-      where: { mentorId: userId },
+      where: { mentorId: mentorId },
       include: {
         space: {
           include: { medias: true, reviews: true },
@@ -49,10 +51,10 @@ export class MentorService {
     });
   }
 
-  async getOneLinkedSpace(userId: string, spaceId: string) {
+  async getOneLinkedSpace(mentorId: string, spaceId: string) {
     const linkedSpace = await this.prismaService.linkedSpaces.findFirst({
       where: {
-        mentorId: userId,
+        mentorId: mentorId,
         spaceId,
       },
       include: {
@@ -77,5 +79,28 @@ export class MentorService {
       averageRating,
       reviews: space.reviews,
     };
+  }
+
+  async getBookingByQrCode(bookingId: string): Promise<BookingType> {
+    const booking = await this.prismaService.bookings.findFirst({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    return booking;
+  }
+
+  async getBookingsByLinkedSpace(
+    spaceId: string,
+    currentUser: UserTokenDto,
+  ): Promise<BookingType[]> {
+    const linkedSpace = await this.getOneLinkedSpace(currentUser.id, spaceId);
+
+    return await this.prismaService.bookings.findMany({
+      where: { spaceId: linkedSpace.id },
+    });
   }
 }

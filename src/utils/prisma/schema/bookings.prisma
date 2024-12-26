@@ -1,6 +1,5 @@
 model Bookings {
     id String @id @default(uuid()) @db.Uuid
-    passType PassType @map("pass_type")
     startDate DateTime @map("start_date")
     startTime  String @map("start_time")
     endTime  String @map("end_time")

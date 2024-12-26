@@ -15,6 +15,7 @@ import { UserTokenDto } from '../token/dto/token.dto';
 import { BookingService } from './booking.service';
 import { CancelBookingOperation } from './decorator/cancelBookingOperation.decorator';
 import { CreateBookingOperation } from './decorator/createBookingOperation.decorator';
+import { GetBookingCommentsOperation } from './decorator/getBookingCommentsOperation.decorator';
 import { GetBookingsOperation } from './decorator/getBookingsOperation.decorator';
 import { GetOneBookingOperation } from './decorator/getOneBookingOperation.decorator';
 import { CreateBookingDto } from './dto/createBooking.dto';
@@ -61,5 +62,14 @@ export class BookingController {
     @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.bookingService.getOneBooking(bookingId, currentUser);
+  }
+
+  @Get(':bookingId/comments')
+  @GetBookingCommentsOperation()
+  async getBookingComments(
+    @Param('bookingId') bookingId: string,
+    @CurrentUser() currentUser: UserTokenDto,
+  ) {
+    return this.bookingService.getBookingComments(bookingId, currentUser);
   }
 }

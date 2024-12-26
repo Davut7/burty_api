@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CommentType } from 'src/helpers/types/comment.type';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { BookingCommonService } from '../common/bookingCommon/bookingCommon.service';
 import { CommentCommonService } from '../common/commentCommon/commentCommon.service';
@@ -43,7 +44,7 @@ export class CommentsService {
     const comment = await this.commentCommonService.findCommentById(commentId);
 
     const updatedComment = await this.prismaService.comments.update({
-      where: { id: comment.id },
+      where: { id: comment.id, mentorId: currentUser.id },
       data: { comment: dto.comment },
     });
 
@@ -53,8 +54,19 @@ export class CommentsService {
   async deleteComment(commentId: string, currentUser: UserTokenDto) {
     const comment = await this.commentCommonService.findCommentById(commentId);
 
-    await this.prismaService.comments.delete({ where: { id: comment.id } });
+    await this.prismaService.comments.delete({
+      where: { id: comment.id, mentorId: currentUser.id },
+    });
 
     return { message: 'Comment deleted successfully!' };
+  }
+
+  async getComments(
+    bookingId: string,
+    currentUser: UserTokenDto,
+  ): Promise<CommentType[]> {
+    return await this.prismaService.comments.findMany({
+      where: { bookingId, mentorId: currentUser.id },
+    });
   }
 }

@@ -156,7 +156,6 @@ async function createUsersAndData() {
 
   const booking = await prisma.bookings.create({
     data: {
-      passType: 'single',
       startDate: new Date('2024-12-20T02:00:00.000Z'),
       startTime: '10:00',
       endTime: '12:00',

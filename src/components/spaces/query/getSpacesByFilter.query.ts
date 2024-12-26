@@ -1,16 +1,13 @@
-import { PickType, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
-  IsEnum,
+  IsInt,
+  IsLatitude,
+  IsLongitude,
   IsNumber,
   IsOptional,
   IsPositive,
-  IsString,
-  IsNotEmpty,
-  IsLongitude,
-  IsLatitude,
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
-import { PassTypeEnum } from 'src/helpers/constants/passType.enum';
 import { PageOptionsDto } from 'src/helpers/dto/page.dto';
 
 export class GetSpacesByFilterQuery extends PickType(PageOptionsDto, [
@@ -50,14 +47,28 @@ export class GetSpacesByFilterQuery extends PickType(PageOptionsDto, [
   maxDistance: number;
 
   @ApiProperty({
-    description: 'The type of pass required for the space.',
-    enum: PassTypeEnum,
-    example: PassTypeEnum.single,
+    description: 'The minimum players to filter spaces.',
+    type: Number,
+    example: 100,
     required: false,
   })
   @IsOptional()
-  @IsEnum(PassTypeEnum)
-  passType: PassTypeEnum;
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  minPlayers: number;
+
+  @ApiProperty({
+    description: 'The maximum players to filter spaces.',
+    type: Number,
+    example: 500,
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  @Type(() => Number)
+  maxPlayers: number;
 
   @ApiProperty({
     description: 'The minimum price to filter spaces.',
