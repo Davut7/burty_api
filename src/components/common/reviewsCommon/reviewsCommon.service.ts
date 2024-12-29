@@ -8,11 +8,11 @@ import { PrismaService } from 'src/utils/prisma/prisma.service';
 @Injectable()
 export class ReviewsCommonService {
   constructor(private prismaService: PrismaService) {}
-  async checkBookingToReview(bookingId: string, userId: string) {
+  async checkBookingToReview(spaceId: string, userId: string) {
     const booking = await this.prismaService.bookings.findFirst({
       where: {
         userId,
-        id: bookingId,
+        spaceId: spaceId,
         status: 'paid',
         isArchived: true,
       },

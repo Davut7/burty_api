@@ -83,6 +83,7 @@ async function createCategoriesWithSpaces() {
         data: {
           name: faker.company.name(),
           address: faker.location.streetAddress(),
+          description: faker.company.name(),
           site: faker.internet.url(),
           categoryId: category.id,
           phoneNumber: faker.phone.number(),

@@ -14,11 +14,11 @@ export class ReviewsService {
 
   async createReview(
     dto: CreateReviewDto,
-    bookingId: string,
+    spaceId: string,
     currentUser: UserTokenDto,
   ) {
     const booking = await this.reviewsCommonService.checkBookingToReview(
-      bookingId,
+      spaceId,
       currentUser.id,
     );
 

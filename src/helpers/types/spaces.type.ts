@@ -9,6 +9,9 @@ export class SpacesType implements Spaces {
   @ApiProperty({ description: 'Name of the space' })
   name: string;
 
+  @ApiProperty({ description: 'Description of the space' })
+  description: string;
+
   @Exclude()
   categoryId: string;
 

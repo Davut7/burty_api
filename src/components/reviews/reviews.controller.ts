@@ -30,16 +30,16 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @CreateReviewOperation()
-  @Post(':bookingId')
+  @Post(':spaceId')
   @HttpCode(HttpStatus.CREATED)
   async createReview(
-    @Param('bookingId', ParseUUIDPipe) bookingId: string,
+    @Param('spaceId', ParseUUIDPipe) spaceId: string,
     @Body() createReviewDto: CreateReviewDto,
     @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.reviewsService.createReview(
       createReviewDto,
-      bookingId,
+      spaceId,
       currentUser,
     );
   }

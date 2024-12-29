@@ -68,7 +68,6 @@ export class BookingService {
     }
 
     let bookingPrice: number;
-    let playersCount: number;
 
     bookingPrice = space.minPrice * dto.playersCount;
 
@@ -77,7 +76,7 @@ export class BookingService {
         spaceId,
         userId: currentUser.id,
         price: bookingPrice,
-        playersCount,
+        playersCount: dto.playersCount,
         status: BookingStatus.pending,
         startDate: sessionDateTime,
         startTime: startHour.toString(),

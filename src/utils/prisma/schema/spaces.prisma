@@ -2,6 +2,7 @@ model Spaces {
   id          String   @id @default(uuid()) @db.Uuid
   name        String   @unique
   address     String
+  description String?
   site        String
   categoryId  String?  @map("category_id") @db.Uuid
   phoneNumber String   @map("phone_number")

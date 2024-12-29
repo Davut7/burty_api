@@ -146,8 +146,6 @@ export class SpacesService {
       minPlayers,
       q = '',
     } = query;
-    console.log('🚀 ~ SpacesService ~ minPlayers:', minPlayers);
-    console.log('🚀 ~ SpacesService ~ maxPlayers:', maxPlayers);
 
     const where: any = {};
     if (q) {
@@ -156,6 +154,8 @@ export class SpacesService {
         { description: { contains: q, mode: 'insensitive' } },
       ];
     }
+
+    await this.prismaService.spaces.findMany({ where: {} });
 
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.minPrice = {};
