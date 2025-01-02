@@ -8,7 +8,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { USER } from 'src/common/decorators/isUser.decorator';
 import { SpacesType } from 'src/helpers/types/spaces.type';
+import { CurrentUser } from '../../common/decorators/currentUser.decorator';
+import { UserTokenDto } from '../token/dto/token.dto';
 import { GetNearbySpacesOperation } from './decorators/getNearbySpacesOperation.decorator';
 import { GetOneSpaceOperation } from './decorators/getOneSpaceOperation.decorator';
 import { GetPopularSpacesOperation } from './decorators/getPopularSpacesOperation.decorator';
@@ -20,6 +23,7 @@ import { SpacesService } from './spaces.service';
 
 @ApiTags('spaces')
 @ApiBearerAuth()
+@USER()
 @Controller('spaces')
 export class SpacesController {
   constructor(private readonly spacesService: SpacesService) {}
@@ -29,8 +33,9 @@ export class SpacesController {
   @HttpCode(HttpStatus.OK)
   async getNearbySpaces(
     @Query() query: GetNearbySpacesQuery,
+    @CurrentUser() currentUser: UserTokenDto,
   ): Promise<SpacesType[]> {
-    return this.spacesService.getNearbySpaces(query);
+    return this.spacesService.getNearbySpaces(query, currentUser.id);
   }
 
   @GetPopularSpacesOperation()
@@ -38,8 +43,9 @@ export class SpacesController {
   @HttpCode(HttpStatus.OK)
   async getPopularSpaces(
     @Query() query: GetNearbySpacesQuery,
+    @CurrentUser() currentUser: UserTokenDto,
   ): Promise<SpacesType[]> {
-    return this.spacesService.getPopularSpaces(query);
+    return this.spacesService.getPopularSpaces(query, currentUser.id);
   }
 
   @GetSpacesByFilterOperation()
@@ -47,8 +53,9 @@ export class SpacesController {
   @HttpCode(HttpStatus.OK)
   async getSpacesByFilter(
     @Query() query: GetSpacesByFilterQuery,
+    @CurrentUser() currentUser: UserTokenDto,
   ): Promise<SpacesType[]> {
-    return this.spacesService.getSpacesByFilter(query);
+    return this.spacesService.getSpacesByFilter(query, currentUser.id);
   }
 
   @GetOneSpaceOperation()

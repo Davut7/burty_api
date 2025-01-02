@@ -54,4 +54,7 @@ export class SpacesType implements Spaces {
 
   @ApiProperty({ description: 'Website URL for the space' })
   site: string;
+
+  @ApiProperty({ description: 'Is space booked' })
+  isBooked?: boolean;
 }

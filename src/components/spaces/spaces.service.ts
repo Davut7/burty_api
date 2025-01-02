@@ -42,6 +42,7 @@ export class SpacesService {
 
   async getNearbySpaces(
     query: GetNearbySpacesQuery,
+    userId: string,
   ): Promise<GetSpacesResponse[]> {
     const {
       latitude,
@@ -50,14 +51,15 @@ export class SpacesService {
       take = 10,
       maxDistance = 10,
     } = query;
+
     const spaces = await this.prismaService.spaces.findMany({
       skip: (page - 1) * take,
       take,
       include: { medias: true, reviews: true },
     });
 
-    return spaces
-      .map((space) => {
+    const enhancedSpaces = await Promise.all(
+      spaces.map(async (space) => {
         const { kilometers, meters } = this.calculateDistance(
           latitude,
           longitude,
@@ -67,6 +69,15 @@ export class SpacesService {
 
         const { reviews, ...rest } = space;
 
+        const isBooked = !!(await this.prismaService.bookings.findFirst({
+          where: {
+            spaceId: space.id,
+            userId: userId,
+            status: 'paid',
+            startDate: { gte: new Date() },
+          },
+        }));
+
         return {
           ...rest,
           averageRating: reviews.length
@@ -75,13 +86,20 @@ export class SpacesService {
             : 0,
           distanceInKm: kilometers,
           distanceInM: meters,
+          isBooked,
         };
-      })
+      }),
+    );
+
+    return enhancedSpaces
       .filter((space) => space.distanceInKm <= maxDistance)
-      .sort((a, b) => a.distanceInKm - b.distanceInM);
+      .sort((a, b) => a.distanceInKm - b.distanceInKm);
   }
 
-  async getPopularSpaces(query: GetNearbySpacesQuery): Promise<SpacesType[]> {
+  async getPopularSpaces(
+    query: GetNearbySpacesQuery,
+    userId: string,
+  ): Promise<SpacesType[]> {
     const {
       latitude,
       longitude,
@@ -99,8 +117,8 @@ export class SpacesService {
       },
     });
 
-    return spaces
-      .map((space) => {
+    const enhancedSpaces = await Promise.all(
+      spaces.map(async (space) => {
         const { kilometers, meters } = this.calculateDistance(
           latitude,
           longitude,
@@ -109,6 +127,15 @@ export class SpacesService {
         );
 
         const { reviews, ...rest } = space;
+
+        const isBooked = !!(await this.prismaService.bookings.findFirst({
+          where: {
+            spaceId: space.id,
+            userId: userId,
+            status: 'paid',
+            startDate: { gte: new Date() },
+          },
+        }));
 
         return {
           ...rest,
@@ -120,8 +147,12 @@ export class SpacesService {
             kilometers,
             meters,
           },
+          isBooked,
         };
-      })
+      }),
+    );
+
+    return enhancedSpaces
       .filter((space) => space.distance.kilometers <= maxDistance)
       .sort((a, b) => {
         if (a.averageRating === b.averageRating) {
@@ -133,6 +164,7 @@ export class SpacesService {
 
   async getSpacesByFilter(
     query: GetSpacesByFilterQuery,
+    userId: string,
   ): Promise<SpacesType[]> {
     const {
       take = 10,
@@ -154,8 +186,6 @@ export class SpacesService {
         { description: { contains: q, mode: 'insensitive' } },
       ];
     }
-
-    await this.prismaService.spaces.findMany({ where: {} });
 
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.minPrice = {};
@@ -201,8 +231,8 @@ export class SpacesService {
       },
     });
 
-    return spaces
-      .map((space) => {
+    const enhancedSpaces = await Promise.all(
+      spaces.map(async (space) => {
         const { kilometers, meters } = this.calculateDistance(
           latitude,
           longitude,
@@ -211,6 +241,15 @@ export class SpacesService {
         );
 
         const { reviews, ...rest } = space;
+
+        const isBooked = !!(await this.prismaService.bookings.findFirst({
+          where: {
+            spaceId: space.id,
+            userId: userId,
+            status: 'paid',
+            startDate: { gte: new Date() },
+          },
+        }));
 
         return {
           ...rest,
@@ -222,8 +261,12 @@ export class SpacesService {
             kilometers,
             meters,
           },
+          isBooked,
         };
-      })
+      }),
+    );
+
+    return enhancedSpaces
       .filter((space) => space.distance.kilometers <= maxDistance)
       .sort((a, b) => {
         if (a.averageRating === b.averageRating) {

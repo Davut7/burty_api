@@ -18,6 +18,7 @@ import { CreateBookingOperation } from './decorator/createBookingOperation.decor
 import { GetBookingCommentsOperation } from './decorator/getBookingCommentsOperation.decorator';
 import { GetBookingsOperation } from './decorator/getBookingsOperation.decorator';
 import { GetOneBookingOperation } from './decorator/getOneBookingOperation.decorator';
+import { AddParticipiantsToBookingDto } from './dto/addParticipiantsToBooking.dto';
 import { CreateBookingDto } from './dto/createBooking.dto';
 import { GetBookingsQuery } from './query/getBookings.query';
 
@@ -53,6 +54,32 @@ export class BookingController {
     @CurrentUser() currentUser: UserTokenDto,
   ) {
     return this.bookingService.getBookings(query, currentUser);
+  }
+
+  @Post(':bookingId/participiants')
+  async addParticipiants(
+    @CurrentUser() currentUser: UserTokenDto,
+    @Body() dto: AddParticipiantsToBookingDto,
+    @Param('bookingId', ParseUUIDPipe) bookingId: string,
+  ) {
+    return await this.bookingService.addParticipiants(
+      bookingId,
+      dto,
+      currentUser,
+    );
+  }
+
+  @Get('/participiants')
+  async verifiyBookingParticipiant(
+    @CurrentUser() currentUser: UserTokenDto,
+    @Query('bookingId', ParseUUIDPipe) bookingId: string,
+    @Query('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return await this.bookingService.verifiyBookingParticipiant(
+      bookingId,
+      userId,
+      currentUser,
+    );
   }
 
   @Get(':bookingId')

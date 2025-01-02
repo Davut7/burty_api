@@ -16,15 +16,40 @@ export class CategoryService {
     });
   }
 
-  async getOneCategory(categoryId: string): Promise<CategoryResponseType> {
+  async getOneCategory(
+    categoryId: string,
+    userId: string,
+  ): Promise<CategoryResponseType> {
     const category = await this.prismaService.category.findUnique({
       where: { id: categoryId },
-      include: { spaces: { include: { medias: true } } },
+      include: { spaces: { include: { medias: true, reviews: true } } },
     });
+
     if (!category) {
       throw new NotFoundException('Category not found!');
     }
 
-    return category;
+    const enhancedSpaces = await Promise.all(
+      category.spaces.map(async (space) => {
+        const isBooked = !!(await this.prismaService.bookings.findFirst({
+          where: {
+            spaceId: space.id,
+            userId: userId,
+            status: 'paid',
+            startDate: { gte: new Date() },
+          },
+        }));
+
+        return {
+          ...space,
+          isBooked,
+        };
+      }),
+    );
+
+    return {
+      ...category,
+      spaces: enhancedSpaces,
+    };
   }
 }

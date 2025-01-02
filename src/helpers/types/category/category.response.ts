@@ -1,5 +1,5 @@
-import { Category } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { Category } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { SpacesType } from '../spaces.type';
 

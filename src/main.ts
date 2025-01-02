@@ -12,6 +12,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as compression from 'compression';
+import fastifyRawBody from 'fastify-raw-body';
 import 'reflect-metadata';
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
 import { AppModule } from './app.module';
@@ -87,6 +88,15 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.setGlobalPrefix('api');
+
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .register(fastifyRawBody, {
+      field: 'rawBody',
+      global: false,
+      routes: ['/stripe/webhook'],
+    });
 
   await app.listen(port, '0.0.0.0', () => {
     console.log(`Your server is listening on port ${port}`);

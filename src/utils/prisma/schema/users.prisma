@@ -18,6 +18,8 @@ model Users {
     bookings Bookings[]
     qrCodes QrCodes[]
     linkedSpaces  LinkedSpaces[]
+    bookingParticipiants BookingParticipiants[]
+    gameStatistics GameStatistics[]
 
      @@map("users")
 }

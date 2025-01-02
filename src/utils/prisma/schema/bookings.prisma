@@ -13,6 +13,8 @@ model Bookings {
     user Users @relation(references: [id], fields: [userId])
     spaces Spaces @relation(references: [id], fields: [spaceId])
     comments Comments[]
+    bookingParticipiants BookingParticipiants[]
+    gameStatistitcs GameStatistics[]
     qrCode QrCodes?
 
     @@map("bookings")

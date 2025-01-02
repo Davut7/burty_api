@@ -73,6 +73,7 @@
     "dotenv": "^16.4.7",
     "dotenv-cli": "^8.0.0",
     "fastify-file-interceptor": "^1.0.9",
+    "fastify-raw-body": "^4.2.1",
     "googleapis": "^144.0.0",
     "ioredis": "^5.4.2",
     "joi": "^17.13.3",

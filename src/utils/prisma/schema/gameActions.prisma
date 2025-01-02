@@ -1,0 +1,11 @@
+model GameActions {
+    id String @id @default(uuid()) @db.Uuid
+    title String
+    gameAction String @map("game_action")
+    userId String @map("user_id") @db.Uuid
+    gameStatisticsId String @map("game_statistics_id") @db.Uuid
+    
+    gameStatistics GameStatistics @relation(fields: [gameStatisticsId], references: [id])
+
+    @@map("game_actions")
+}

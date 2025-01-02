@@ -12,6 +12,7 @@ import { MediaService } from 'src/libs/media/media.service';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { UserTokenDto } from '../token/dto/token.dto';
 import { UpdateUserProfileDto } from './dto/updateUserProfile.dto';
+import { UpdateUserProfile } from './response/updateUserProfile.response';
 
 @Injectable()
 export class UsersService {
@@ -109,19 +110,19 @@ export class UsersService {
   async updateProfile(
     currentUser: UserTokenDto,
     dto: UpdateUserProfileDto,
-  ): Promise<SuccessMessageType> {
+  ): Promise<UpdateUserProfile> {
     this.logger.log(`Обновление профиля пользователя с ID: ${currentUser.id}`);
     const user = await this.findUserById(currentUser.id);
 
     if (dto.password) {
       dto.password = await generateHash(dto.password);
     }
-    await this.prismaService.users.update({
+    const updatedUser = await this.prismaService.users.update({
       where: { id: user.id },
       data: { ...dto },
     });
 
-    return { message: 'User profile updated successfully' };
+    return { message: 'User profile updated successfully', user: updatedUser };
   }
 
   private async findUserById(userId: string) {
