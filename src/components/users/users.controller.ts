@@ -55,6 +55,11 @@ export class UsersController {
     return this.usersService.deleteAccount(currentUser);
   }
 
+  @Get('qrcode')
+  async getQrcode(@CurrentUser() currentUser: UserTokenDto) {
+    return await this.usersService.getQrcode(currentUser.id);
+  }
+
   @UploadProfilePictureOperation()
   @Post('profile/picture')
   async uploadProfilePicture(

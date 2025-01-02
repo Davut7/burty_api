@@ -50,11 +50,12 @@ export class MentorController {
     );
   }
 
-  @Get('bookings/:bookingId')
+  @Get('bookings/:userId')
   @GetBookingByQrCodeOperation()
   async getBookingByQrCode(
-    @Param('bookingId', ParseUUIDPipe) bookingId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser() currentUser: UserTokenDto,
   ) {
-    return await this.mentorService.getBookingByQrCode(bookingId);
+    return await this.mentorService.getBookingByQrCode(userId, currentUser);
   }
 }

@@ -211,7 +211,7 @@ async function createUsersAndData() {
   };
 
   const qrCode = await prisma.qrCodes.create({
-    data: { userId: user.id, bookingId: booking.id },
+    data: { userId: user.id, email: user.email },
   });
 
   const transformedFile = await imageTransformer.transform(multerFile);

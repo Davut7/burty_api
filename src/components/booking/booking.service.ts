@@ -8,13 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { BookingStatus } from '@prisma/client';
 import { addDays } from 'date-fns';
-import { createReadStream } from 'fs';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as QRCode from 'qrcode';
-import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
 import { CommentType } from 'src/helpers/types/comment.type';
-import { MediaService } from 'src/libs/media/media.service';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { UserCommonService } from '../common/userCommon/userCommon.service';
 import { MailsService } from '../mails/mails.service';
@@ -27,8 +21,6 @@ export class BookingService {
   private backendUrl: string;
   constructor(
     private prismaService: PrismaService,
-    private mediaService: MediaService,
-    private imageTransformer: ImageTransformer,
     private userCommonService: UserCommonService,
     private mailService: MailsService,
     private configService: ConfigService,
@@ -54,24 +46,41 @@ export class BookingService {
 
     const bookingPrice = this.calculateBookingPrice(space, dto.playersCount);
 
-    const booking = await this.createBookingRecord({
+    return await this.createBookingRecord({
       dto,
       spaceId,
       currentUser,
       sessionDateTime,
       bookingPrice,
     });
+  }
 
-    const qrCodePath = await this.generateQRCode({
-      booking,
-      spaceId,
-      userId: currentUser.id,
-      sessionDateTime,
-      visitTime: dto.visitTime,
+  private async createBookingRecord({
+    dto,
+    spaceId,
+    currentUser,
+    sessionDateTime,
+    bookingPrice,
+  }: {
+    dto: CreateBookingDto;
+    spaceId: string;
+    currentUser: UserTokenDto;
+    sessionDateTime: Date;
+    bookingPrice: number;
+  }) {
+    const [startHour, endHour] = dto.visitTime.split('-');
+    return await this.prismaService.bookings.create({
+      data: {
+        spaceId,
+        userId: currentUser.id,
+        price: bookingPrice,
+        playersCount: dto.playersCount,
+        status: BookingStatus.pending,
+        startDate: sessionDateTime,
+        startTime: startHour.toString(),
+        endTime: endHour.toString(),
+      },
     });
-    await this.saveQRCode(qrCodePath, booking.id, currentUser.id);
-
-    return booking;
   }
 
   private async getSpaceById(spaceId: string) {
@@ -113,98 +122,6 @@ export class BookingService {
 
   private calculateBookingPrice(space: any, playersCount: number): number {
     return space.minPrice * playersCount;
-  }
-
-  private async createBookingRecord({
-    dto,
-    spaceId,
-    currentUser,
-    sessionDateTime,
-    bookingPrice,
-  }: {
-    dto: CreateBookingDto;
-    spaceId: string;
-    currentUser: UserTokenDto;
-    sessionDateTime: Date;
-    bookingPrice: number;
-  }) {
-    const [startHour, endHour] = dto.visitTime.split('-');
-    return await this.prismaService.bookings.create({
-      data: {
-        spaceId,
-        userId: currentUser.id,
-        price: bookingPrice,
-        playersCount: dto.playersCount,
-        status: BookingStatus.pending,
-        startDate: sessionDateTime,
-        startTime: startHour.toString(),
-        endTime: endHour.toString(),
-      },
-    });
-  }
-
-  private async generateQRCode({
-    booking,
-    spaceId,
-    userId,
-    sessionDateTime,
-    visitTime,
-  }: {
-    booking: any;
-    spaceId: string;
-    userId: string;
-    sessionDateTime: Date;
-    visitTime: string;
-  }): Promise<string> {
-    const [startHour, endHour] = visitTime.split('-');
-    const qrData = {
-      bookingId: booking.id,
-      spaceId,
-      userId,
-      startDate: sessionDateTime,
-      startTime: startHour,
-      endTime: endHour,
-    };
-
-    const qrCodePath = `./temp/qr-code-${booking.id}.png`;
-    await QRCode.toFile(qrCodePath, JSON.stringify(qrData));
-    return qrCodePath;
-  }
-
-  private async saveQRCode(
-    qrCodePath: string,
-    bookingId: string,
-    userId: string,
-  ) {
-    const fileBuffer = await fs.readFile(qrCodePath);
-    const stats = await fs.stat(qrCodePath);
-
-    const multerFile: Express.Multer.File = {
-      fieldname: 'file',
-      originalname: path.basename(qrCodePath),
-      encoding: '7bit',
-      mimetype: 'image/png',
-      size: stats.size,
-      buffer: fileBuffer,
-      destination: './temp',
-      filename: path.basename(qrCodePath),
-      path: qrCodePath,
-      stream: createReadStream(qrCodePath),
-    };
-
-    const transformedFile = await this.imageTransformer.transform(multerFile);
-    const qrCode = await this.prismaService.qrCodes.create({
-      data: {
-        bookingId,
-        userId,
-      },
-    });
-
-    await this.mediaService.createFileMedia(
-      transformedFile,
-      qrCode.id,
-      'qrCodeId',
-    );
   }
 
   async cancelBooking(bookingId: string, currentUser: UserTokenDto) {
@@ -251,7 +168,6 @@ export class BookingService {
       where: { id: bookingId, userId: currentUser.id },
       include: {
         spaces: { include: { medias: true } },
-        qrCode: { include: { medias: true } },
       },
     });
 

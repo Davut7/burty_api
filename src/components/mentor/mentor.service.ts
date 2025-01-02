@@ -81,16 +81,31 @@ export class MentorService {
     };
   }
 
-  async getBookingByQrCode(bookingId: string): Promise<BookingType> {
-    const booking = await this.prismaService.bookings.findFirst({
-      where: { id: bookingId },
+  async getBookingByQrCode(
+    userId: string,
+    currentUser: UserTokenDto,
+  ): Promise<BookingType> {
+    const qrcode = await this.prismaService.qrCodes.findFirst({
+      where: { userId },
     });
 
-    if (!booking) {
-      throw new NotFoundException('Booking not found');
+    if (!qrcode) {
+      throw new NotFoundException('Qrcode data not found!');
     }
 
-    return booking;
+    const linkedSpaces = await this.prismaService.linkedSpaces.findMany({
+      where: { mentorId: currentUser.id },
+    });
+
+    const userBookings = await this.prismaService.bookings.findMany({
+      where: { startDate: { gt: new Date() }, userId },
+    });
+
+    return userBookings.find((booking) =>
+      linkedSpaces.some(
+        (linkedSpace) => linkedSpace.spaceId === booking.spaceId,
+      ),
+    );
   }
 
   async getBookingsByLinkedSpace(

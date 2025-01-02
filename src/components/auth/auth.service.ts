@@ -8,11 +8,17 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthProviders, Users } from '@prisma/client';
+import { createReadStream } from 'fs';
+import { readFile, stat } from 'fs/promises';
+import path from 'path';
+import * as QRCode from 'qrcode';
+import { ImageTransformer } from 'src/common/pipes/imageTransform.pipe';
 import { SuccessMessageType } from 'src/helpers/common/successMessage.type';
 import { generateHash, verifyHash } from 'src/helpers/providers/generateHash';
 import { generateResetPasswordLink } from 'src/helpers/providers/generateResetPasswordLink';
 import { generateVerificationCodeAndExpiry } from 'src/helpers/providers/generateVerificationCode';
 import { UsersType } from 'src/helpers/types/users/users.type';
+import { MediaService } from 'src/libs/media/media.service';
 import { RedisService } from 'src/libs/redis/redis.service';
 import { PrismaService } from 'src/utils/prisma/prisma.service';
 import { UserCommonService } from '../common/userCommon/userCommon.service';
@@ -43,6 +49,8 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
+    private readonly imageTransformer: ImageTransformer,
+    private readonly mediaService: MediaService,
   ) {
     this.backendUrl = this.configService.getOrThrow<string>('BACKEND_URL');
   }
@@ -100,6 +108,16 @@ export class AuthService {
     });
 
     await this.tokenService.saveTokens(user.id, tokens.refreshToken);
+    const userQrcode = await this.prismaService.qrCodes.findFirst({
+      where: { userId: user.id, email: user.email },
+    });
+
+    if (userQrcode) {
+      return { user, message: 'Пользователь успешно подтвержден', ...tokens };
+    }
+
+    const qrCodePath = await this.generateQRCode(user.id, user.email);
+    await this.saveQRCode(qrCodePath, user.id, user.email);
 
     return { user, message: 'Пользователь успешно подтвержден', ...tokens };
   }
@@ -372,5 +390,48 @@ export class AuthService {
   private generateResetPasswordLink(user: Users, resetToken: string): string {
     this.logger.log('Генерация ссылки для сброса пароля...');
     return generateResetPasswordLink(this.backendUrl, resetToken, user.id);
+  }
+
+  private async generateQRCode(userId: string, email: string): Promise<string> {
+    const qrData = {
+      email,
+      userId,
+    };
+
+    const qrCodePath = `./temp/qr-code-${userId}.png`;
+    await QRCode.toFile(qrCodePath, JSON.stringify(qrData));
+    return qrCodePath;
+  }
+
+  private async saveQRCode(qrCodePath: string, userId: string, email: string) {
+    const fileBuffer = await readFile(qrCodePath);
+    const stats = await stat(qrCodePath);
+
+    const multerFile: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: path.basename(qrCodePath),
+      encoding: '7bit',
+      mimetype: 'image/png',
+      size: stats.size,
+      buffer: fileBuffer,
+      destination: './temp',
+      filename: path.basename(qrCodePath),
+      path: qrCodePath,
+      stream: createReadStream(qrCodePath),
+    };
+
+    const transformedFile = await this.imageTransformer.transform(multerFile);
+    const qrCode = await this.prismaService.qrCodes.create({
+      data: {
+        userId,
+        email,
+      },
+    });
+
+    await this.mediaService.createFileMedia(
+      transformedFile,
+      qrCode.id,
+      'qrCodeId',
+    );
   }
 }

@@ -36,6 +36,18 @@ export class UsersService {
     return user;
   }
 
+  async getQrcode(userId: string) {
+    const qrcode = await this.prismaService.qrCodes.findFirst({
+      where: { userId },
+      include: { medias: true },
+    });
+
+    if (!qrcode) {
+      throw new NotFoundException('Qrcode not found!');
+    }
+    return qrcode;
+  }
+
   async uploadProfilePicture(
     currentUser: UserTokenDto,
     image: ITransformedFile,
